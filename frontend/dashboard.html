@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Notifica AME PG</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+    <script src="/js/app.js"></script>
+    <script>tailwind.config = window.tailwindConfig;</script>
+    <style>
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        body { font-family: 'Inter', sans-serif; } h1, h2, h3, .brand-font { font-family: 'Manrope', sans-serif; }
+    </style>
+</head>
+<body class="bg-surface text-on-surface flex min-h-screen">
+    
+    <aside class="h-screen w-64 fixed left-0 top-0 bg-[#001B3D] flex flex-col py-8 space-y-2 z-50">
+        <div class="px-6 mb-8">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-lg bg-primary-container flex items-center justify-center text-white overflow-hidden">
+                    <span class="material-symbols-outlined">local_hospital</span>
+                </div>
+                <div>
+                    <div class="text-[#FFFFFF] font-bold text-lg brand-font">AME PG</div>
+                    <div class="text-[#D6E3FF]/60 text-xs font-medium uppercase tracking-wider">Qualidade</div>
+                </div>
+            </div>
+        </div>
+        <nav class="flex-1 space-y-1">
+            <a class="bg-[#D6E3FF] text-[#001B3D] rounded-full mx-4 py-3 font-bold flex items-center px-4 transition-all" href="/dashboard.html">
+                <span class="material-symbols-outlined mr-3">dashboard</span>
+                <span class="text-sm font-label">Painel</span>
+            </a>
+            <a class="text-[#D6E3FF]/70 hover:text-white hover:bg-white/10 rounded-full mx-4 py-3 flex items-center px-4 transition-all" href="/nova_notificacao.html">
+                <span class="material-symbols-outlined mr-3">add_circle</span>
+                <span class="text-sm font-label">Criar Notificação</span>
+            </a>
+        </nav>
+        <div class="pt-4 border-t border-white/10 space-y-1">
+            <a onclick="logout()" class="cursor-pointer text-error-container/80 hover:text-error-container hover:bg-white/10 rounded-full mx-4 py-3 flex items-center px-4 transition-all">
+                <span class="material-symbols-outlined mr-3">logout</span>
+                <span class="text-sm font-label">Sair</span>
+            </a>
+        </div>
+    </aside>
+
+    <main class="flex-1 ml-64 flex flex-col">
+        <header class="fixed top-0 right-0 left-64 h-16 bg-white/80 backdrop-blur-xl flex justify-between items-center px-8 z-40 shadow-sm border-b border-surface-container">
+            <h1 class="text-xl font-bold tracking-tight text-[#001B3D] brand-font" id="headerTitle">Dashboard</h1>
+            <div class="flex items-center space-x-3 pl-4">
+                <div class="text-right">
+                    <p class="text-sm font-semibold text-on-surface leading-tight" id="userNameHeader">Carregando...</p>
+                    <p class="text-[11px] text-on-surface-variant leading-tight" id="userRoleHeader">Setor</p>
+                </div>
+            </div>
+        </header>
+
+        <div class="mt-16 p-8 space-y-8" id="tablesContainer">
+            <!-- As tabelas serão injetadas via JS -->
+            <div class="text-center p-8 text-on-surface-variant">Carregando dados...</div>
+        </div>
+    </main>
+
+    <script>
+        let currentUser = null;
+
+        async function init() {
+            try {
+                const meRes = await apiFetch('/api/auth/me');
+                currentUser = await meRes.json();
+                
+                document.getElementById('userNameHeader').innerText = currentUser.username;
+                document.getElementById('userRoleHeader').innerText = currentUser.setor;
+
+                if (currentUser.setor === "NSP") {
+                    document.getElementById('headerTitle').innerText = "Dashboard de Qualidade - NSP";
+                } else {
+                    document.getElementById('headerTitle').innerText = `Dashboard - ${currentUser.setor}`;
+                }
+
+                loadNotificacoes();
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        function createTableHTML(id, title, desc) {
+            return `
+            <div class="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden border border-surface-container mb-8">
+                <div class="p-8 border-b border-surface-container flex justify-between items-center">
+                    <div>
+                        <h2 class="text-xl font-bold text-on-primary-fixed brand-font">${title}</h2>
+                        <p class="text-sm text-on-surface-variant">${desc}</p>
+                    </div>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-surface-container-low">
+                                <th class="px-8 py-4 text-xs font-bold text-on-surface-variant uppercase tracking-wider">Protocolo</th>
+                                <th class="px-8 py-4 text-xs font-bold text-on-surface-variant uppercase tracking-wider">Ocorrência</th>
+                                <th class="px-8 py-4 text-xs font-bold text-on-surface-variant uppercase tracking-wider">Setor Referência</th>
+                                <th class="px-8 py-4 text-xs font-bold text-on-surface-variant uppercase tracking-wider">Nível de Risco</th>
+                                <th class="px-8 py-4 text-xs font-bold text-on-surface-variant uppercase tracking-wider">Status</th>
+                                <th class="px-8 py-4"></th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-surface-container" id="${id}">
+                            <tr><td colspan="6" class="px-8 py-4 text-center text-sm text-on-surface-variant">Carregando...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>`;
+        }
+
+        async function loadNotificacoes() {
+            const res = await apiFetch('/api/notificacoes');
+            const data = await res.json();
+            const container = document.getElementById('tablesContainer');
+            container.innerHTML = '';
+            
+            if (currentUser.setor === "NSP") {
+                container.innerHTML = createTableHTML('listNSP', 'Fila de Triagem - NSP', 'Notificações aguardando classificação e direcionamento ou acompanhamento.');
+                populateTable('listNSP', data);
+            } else {
+                container.innerHTML = 
+                    createTableHTML('listRecebidas', 'Ocorrências Recebidas', 'Notificações direcionadas ao seu setor pelo NSP para tratativa.') +
+                    createTableHTML('listRelatadas', 'Ocorrências Relatadas', 'Notificações geradas pelo seu setor para acompanhamento.');
+                
+                const recebidas = data.filter(n => n.setor_notificado_definitivo === currentUser.setor);
+                const relatadas = data.filter(n => n.setor_notificador === currentUser.setor);
+                
+                populateTable('listRecebidas', recebidas);
+                populateTable('listRelatadas', relatadas);
+            }
+        }
+        
+        function populateTable(tbodyId, dataList) {
+            const tbody = document.getElementById(tbodyId);
+            tbody.innerHTML = '';
+            
+            if(dataList.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="px-8 py-4 text-center text-sm text-on-surface-variant">Nenhuma notificação nesta fila.</td></tr>';
+                return;
+            }
+
+            dataList.forEach(n => {
+                let riscoBadge = `<span class="text-[10px] uppercase font-bold text-on-surface-variant bg-surface-variant px-2 py-1 rounded-full">N/A</span>`;
+                if(n.nivel_risco_calculado === "Baixo") riscoBadge = `<span class="text-[10px] uppercase font-bold text-on-secondary-fixed bg-secondary-fixed px-2 py-1 rounded-full">Baixo</span>`;
+                if(n.nivel_risco_calculado === "Médio") riscoBadge = `<span class="text-[10px] uppercase font-bold text-on-tertiary-fixed bg-tertiary-fixed px-2 py-1 rounded-full">Médio</span>`;
+                if(n.nivel_risco_calculado === "Alto") riscoBadge = `<span class="text-[10px] uppercase font-bold text-on-error-container bg-error-container/30 px-2 py-1 rounded-full">Alto</span>`;
+                if(n.nivel_risco_calculado === "Crítico") riscoBadge = `<span class="text-[10px] uppercase font-bold text-white bg-error px-2 py-1 rounded-full">Crítico</span>`;
+
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-surface-container-low transition-colors group cursor-pointer";
+                tr.onclick = () => window.location.href = `/detalhe.html?id=${n.id}`;
+                
+                tr.innerHTML = `
+                    <td class="px-8 py-4 whitespace-nowrap">
+                        <div class="text-sm font-bold text-on-surface">${n.protocolo_acompanhamento}</div>
+                        <div class="text-[11px] text-on-surface-variant">${new Date(n.data_criacao).toLocaleDateString('pt-BR')}</div>
+                    </td>
+                    <td class="px-8 py-4">
+                        <div class="text-sm text-on-surface truncate max-w-xs">${n.descricao_evento}</div>
+                    </td>
+                    <td class="px-8 py-4 whitespace-nowrap text-sm font-semibold">${n.setor_sugerido}</td>
+                    <td class="px-8 py-4 whitespace-nowrap">${riscoBadge}</td>
+                    <td class="px-8 py-4 whitespace-nowrap">
+                        <span class="text-[10px] font-bold px-2 py-1 rounded bg-surface-variant">${n.status}</span>
+                    </td>
+                    <td class="px-8 py-4 text-right">
+                        <button class="p-2 text-primary hover:bg-primary-fixed rounded-full transition-colors">
+                            <span class="material-symbols-outlined">visibility</span>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        init();
+    </script>
+</body>
+</html>

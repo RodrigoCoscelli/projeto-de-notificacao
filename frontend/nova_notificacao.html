@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nova Notificação - Notifica AME PG</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+    <script src="/js/app.js"></script>
+    <script>tailwind.config = window.tailwindConfig;</script>
+    <style>
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        body { font-family: 'Inter', sans-serif; } h1, h2, h3, .brand-font { font-family: 'Manrope', sans-serif; }
+    </style>
+</head>
+<body class="bg-surface text-on-surface flex min-h-screen hidden" id="pageBody">
+    
+    <aside class="h-screen w-64 fixed left-0 top-0 bg-[#001B3D] flex flex-col py-8 space-y-2 z-50">
+        <div class="px-6 mb-8">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-lg bg-primary-container flex items-center justify-center text-white overflow-hidden">
+                    <span class="material-symbols-outlined">local_hospital</span>
+                </div>
+                <div>
+                    <div class="text-[#FFFFFF] font-bold text-lg brand-font">AME PG</div>
+                    <div class="text-[#D6E3FF]/60 text-xs font-medium uppercase tracking-wider">Qualidade</div>
+                </div>
+            </div>
+        </div>
+        <nav class="flex-1 space-y-1">
+            <a class="text-[#D6E3FF]/70 hover:text-white hover:bg-white/10 rounded-full mx-4 py-3 flex items-center px-4 transition-all" href="/dashboard.html">
+                <span class="material-symbols-outlined mr-3">dashboard</span>
+                <span class="text-sm font-label">Painel</span>
+            </a>
+            <a class="bg-[#D6E3FF] text-[#001B3D] rounded-full mx-4 py-3 font-bold flex items-center px-4 transition-all" href="/nova_notificacao.html">
+                <span class="material-symbols-outlined mr-3">add_circle</span>
+                <span class="text-sm font-label">Criar Notificação</span>
+            </a>
+        </nav>
+        <div class="pt-4 border-t border-white/10 space-y-1">
+            <a onclick="logout()" class="cursor-pointer text-error-container/80 hover:text-error-container hover:bg-white/10 rounded-full mx-4 py-3 flex items-center px-4 transition-all">
+                <span class="material-symbols-outlined mr-3">logout</span>
+                <span class="text-sm font-label">Sair</span>
+            </a>
+        </div>
+    </aside>
+
+    <main class="flex-1 ml-64 flex flex-col">
+        <header class="fixed top-0 right-0 left-64 h-16 bg-white/80 backdrop-blur-xl flex justify-between items-center px-8 z-40 shadow-sm border-b border-surface-container">
+            <h1 class="text-xl font-bold tracking-tight text-[#001B3D] brand-font">Criar Notificação</h1>
+            <div class="flex items-center space-x-3 pl-4">
+                <div class="text-right">
+                    <p class="text-sm font-semibold text-on-surface leading-tight" id="userNameHeader">Carregando...</p>
+                    <p class="text-[11px] text-on-surface-variant leading-tight" id="userRoleHeader">Setor</p>
+                </div>
+            </div>
+        </header>
+
+        <div class="mt-16 p-8 flex items-start justify-center flex-1">
+            <div class="max-w-2xl w-full bg-surface-container-lowest p-8 rounded-xl shadow border border-surface-container">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold text-primary brand-font">Nova Notificação de Evento</h2>
+                </div>
+                
+                <form id="notificacaoForm" class="space-y-6">
+                    <div class="p-4 bg-primary-fixed/20 rounded-lg border border-primary-fixed">
+                        <label class="flex items-center space-x-2 cursor-pointer">
+                            <input type="checkbox" id="anonimo" class="rounded text-primary focus:ring-primary h-5 w-5">
+                            <span class="font-bold text-on-surface">Relatar anonimamente</span>
+                        </label>
+                        <p class="text-xs text-on-surface-variant mt-1 ml-7">Sua identidade não será registrada. Cultura não punitiva.</p>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Data da Ocorrência *</label>
+                            <input type="date" id="data_ocorrencia" class="w-full rounded-lg border-outline-variant px-4 py-2" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Setor Envolvido Sugerido *</label>
+                            <select id="setor_sugerido" class="w-full rounded-lg border-outline-variant px-4 py-2" required>
+                                <option value="">Selecione...</option>
+                                <option value="Recepção">Recepção</option>
+                                <option value="Enfermagem">Enfermagem</option>
+                                <option value="Farmácia">Farmácia</option>
+                                <option value="Centro Cirúrgico">Centro Cirúrgico</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Descrição do Evento *</label>
+                        <textarea id="descricao_evento" rows="5" class="w-full rounded-lg border-outline-variant px-4 py-2" required placeholder="Descreva o que ocorreu de forma clara e objetiva..."></textarea>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Evidência (Opcional - Imagem/PDF)</label>
+                        <input type="file" id="arquivo" class="w-full rounded-lg border-outline-variant px-4 py-2">
+                    </div>
+
+                    <button type="submit" class="w-full bg-primary text-white py-3 rounded-lg font-bold text-lg hover:opacity-90 shadow-md">Enviar Notificação</button>
+                </form>
+
+                <div id="sucesso" class="hidden mt-6 p-6 bg-[#d6e3ff] border border-[#00478d] rounded-xl text-center">
+                    <h2 class="text-xl font-bold text-[#001b3d] mb-2">Notificação Registrada com Sucesso!</h2>
+                    <p class="mb-4">Por favor, anote o seu protocolo para acompanhamento:</p>
+                    <div class="text-3xl font-extrabold text-[#00478d] tracking-wider bg-white py-3 rounded-lg border border-[#a9c7ff] mb-4 shadow-inner" id="protocoloGerado"></div>
+                    <a href="/dashboard.html" class="text-sm font-bold bg-[#00478d] text-white px-6 py-2 rounded-lg hover:opacity-90 transition-opacity">Ir para o Painel</a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        async function initAuth() {
+            try {
+                const meRes = await apiFetch('/api/auth/me');
+                if (!meRes.ok) throw new Error('Não autenticado');
+                const currentUser = await meRes.json();
+                document.getElementById('userNameHeader').innerText = currentUser.username;
+                document.getElementById('userRoleHeader').innerText = currentUser.setor;
+                document.getElementById('pageBody').classList.remove('hidden');
+            } catch (e) {
+                window.location.href = '/login.html';
+            }
+        }
+
+        document.getElementById('notificacaoForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const fd = new FormData();
+            fd.append('data_ocorrencia', document.getElementById('data_ocorrencia').value);
+            fd.append('descricao_evento', document.getElementById('descricao_evento').value);
+            fd.append('setor_sugerido', document.getElementById('setor_sugerido').value);
+            fd.append('anonimo', document.getElementById('anonimo').checked);
+            
+            const fileInput = document.getElementById('arquivo');
+            if(fileInput.files.length > 0) {
+                fd.append('arquivo', fileInput.files[0]);
+            }
+
+            try {
+                const res = await apiFetch('/api/notificacoes', {
+                    method: 'POST',
+                    body: fd
+                }, true); // Passando true para isFormData para o apiFetch não definir Content-Type manual
+                
+                if(res.ok) {
+                    const data = await res.json();
+                    document.getElementById('notificacaoForm').classList.add('hidden');
+                    document.getElementById('sucesso').classList.remove('hidden');
+                    document.getElementById('protocoloGerado').innerText = data.protocolo_acompanhamento;
+                } else {
+                    alert('Erro ao registrar notificação.');
+                }
+            } catch(e) { alert("Erro de conexão"); }
+        });
+
+        initAuth();
+    </script>
+</body>
+</html>

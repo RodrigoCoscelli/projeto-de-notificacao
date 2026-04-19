@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalhes da Notificação - AME PG</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap"
+        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet">
+    <script src="/js/app.js"></script>
+    <script>tailwind.config = window.tailwindConfig;</script>
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        h1,
+        h2,
+        h3,
+        .brand-font {
+            font-family: 'Manrope', sans-serif;
+        }
+    </style>
+</head>
+
+<body class="bg-surface text-on-surface flex min-h-screen">
+
+    <aside class="h-screen w-64 fixed left-0 top-0 bg-[#001B3D] flex flex-col py-8 space-y-2 z-50">
+        <div class="px-6 mb-8">
+            <div class="flex items-center gap-3">
+                <div
+                    class="w-10 h-10 rounded-lg bg-primary-container flex items-center justify-center text-white overflow-hidden">
+                    <span class="material-symbols-outlined">local_hospital</span>
+                </div>
+                <div>
+                    <div class="text-[#FFFFFF] font-bold text-lg brand-font">AME PG</div>
+                    <div class="text-[#D6E3FF]/60 text-xs font-medium uppercase tracking-wider">Qualidade</div>
+                </div>
+            </div>
+        </div>
+        <nav class="flex-1 space-y-1">
+            <a class="text-[#D6E3FF]/70 hover:text-white hover:bg-white/10 rounded-full mx-4 py-3 flex items-center px-4 transition-all"
+                href="/dashboard.html">
+                <span class="material-symbols-outlined mr-3">dashboard</span>
+                <span class="text-sm font-label">Painel</span>
+            </a>
+            <a class="text-[#D6E3FF]/70 hover:text-white hover:bg-white/10 rounded-full mx-4 py-3 flex items-center px-4 transition-all"
+                href="/nova_notificacao.html">
+                <span class="material-symbols-outlined mr-3">add_circle</span>
+                <span class="text-sm font-label">Criar Notificação</span>
+            </a>
+        </nav>
+        <div class="pt-4 border-t border-white/10 space-y-1">
+            <a onclick="logout()"
+                class="cursor-pointer text-error-container/80 hover:text-error-container hover:bg-white/10 rounded-full mx-4 py-3 flex items-center px-4 transition-all">
+                <span class="material-symbols-outlined mr-3">logout</span>
+                <span class="text-sm font-label">Sair</span>
+            </a>
+        </div>
+    </aside>
+
+    <main class="flex-1 ml-64 flex flex-col">
+        <header
+            class="fixed top-0 right-0 left-64 h-16 bg-white/80 backdrop-blur-xl flex justify-between items-center px-8 z-40 shadow-sm border-b border-surface-container">
+            <h1 class="text-xl font-bold tracking-tight text-[#001B3D] brand-font">Detalhes da Notificação</h1>
+            <div class="flex items-center space-x-3 pl-4">
+                <div class="text-right">
+                    <p class="text-sm font-semibold text-on-surface leading-tight" id="userNameHeader">Carregando...</p>
+                    <p class="text-[11px] text-on-surface-variant leading-tight" id="userRoleHeader">Setor</p>
+                </div>
+            </div>
+        </header>
+
+        <div class="mt-16 p-8">
+            <div
+                class="max-w-4xl mx-auto bg-surface-container-lowest p-8 rounded-xl shadow border border-surface-container">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold text-primary brand-font" id="tProto">Carregando...</h2>
+                    <a href="/dashboard.html" class="text-sm font-bold text-primary hover:underline flex items-center">
+                        <span class="material-symbols-outlined mr-1 text-sm">arrow_back</span>
+                        Voltar ao Painel
+                    </a>
+                </div>
+
+                <div class="grid grid-cols-2 gap-6 mb-8 text-sm">
+                    <div><strong>Data da Ocorrência:</strong> <span id="tData"></span></div>
+                    <div><strong>Status:</strong> <span id="tStatus"
+                            class="bg-surface-variant px-2 py-1 rounded"></span></div>
+                    <div class="col-span-2">
+                        <strong>Descrição do Evento:</strong>
+                        <p class="mt-2 p-4 bg-surface-container-low rounded border border-outline-variant/30"
+                            id="tDesc"></p>
+                    </div>
+                    <div><strong>Setor Notificador:</strong> <span id="tSetorNotif"></span></div>
+                    <div><strong>Autor:</strong> <span id="tAutor"></span></div>
+                    <div><strong>Setor Sugerido:</strong> <span id="tSetorSug"></span></div>
+                    <div>
+                        <strong>Evidência:</strong>
+                        <a id="tAnexo" href="#" target="_blank"
+                            class="text-primary hover:underline font-bold hidden">Baixar Anexo</a>
+                        <span id="tSemAnexo" class="text-on-surface-variant italic">Nenhum arquivo.</span>
+                    </div>
+                </div>
+
+                <hr class="my-8 border-outline-variant/30">
+
+                <!-- Bloco para NSP fazer Triagem -->
+                <div id="blocoTriagem" class="hidden space-y-6">
+                    <h3 class="text-xl font-bold text-primary brand-font border-l-4 border-primary pl-3">Ação: Triagem
+                        NSP</h3>
+                    <form id="triagemForm" class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Classificação do Evento</label>
+                            <select id="tipo_evento" class="w-full rounded border-outline-variant" required>
+                                <option value="Near Miss/Quase Falha">Near Miss / Quase Falha</option>
+                                <option value="Incidente sem dano">Incidente sem dano</option>
+                                <option value="Incidente com dano">Incidente com dano</option>
+                                <option value="Evento Sentinela">Evento Sentinela</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Setor Responsável Definitivo</label>
+                            <select id="setor_definitivo" class="w-full rounded border-outline-variant" required>
+                                <option value="Recepção">Recepção</option>
+                                <option value="Enfermagem">Enfermagem</option>
+                                <option value="Farmácia">Farmácia</option>
+                                <option value="Centro Cirúrgico">Centro Cirúrgico</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Frequência (1 a 5)</label>
+                            <input type="number" id="freq" min="1" max="5" class="w-full rounded border-outline-variant"
+                                required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Impacto (1 a 5)</label>
+                            <input type="number" id="imp" min="1" max="5" class="w-full rounded border-outline-variant"
+                                required>
+                        </div>
+                        <div class="col-span-2 pt-2 flex items-center space-x-4">
+                            <button type="button" onclick="salvarTriagem(false)"
+                                class="bg-primary text-white px-6 py-2 rounded font-bold hover:opacity-90">Enviar para
+                                Setor</button>
+                            <button type="button" onclick="salvarTriagem(true)"
+                                class="bg-error text-white px-6 py-2 rounded font-bold hover:opacity-90">Encerrar
+                                Notificação Imediatamente</button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Resultado da Triagem (Visível se já triado) -->
+                <div id="blocoTriagemResultado"
+                    class="hidden bg-surface-container-low p-4 rounded text-sm mb-6 border border-outline-variant/30">
+                    <strong>Análise do NSP:</strong> <br>
+                    Nível de Risco: <span class="text-primary font-bold" id="rNivel"></span> (Freq: <span
+                        id="rFreq"></span>, Imp: <span id="rImp"></span>)<br>
+                    Tipo: <span class="font-semibold" id="rTipo"></span><br>
+                    Setor Responsável: <span class="font-semibold" id="rResp"></span>
+                </div>
+
+                <!-- Bloco para Setor fazer Resposta -->
+                <div id="blocoResposta" class="hidden space-y-6">
+                    <h3 class="text-xl font-bold text-primary brand-font border-l-4 border-secondary pl-3">Ação:
+                        Tratativa do Setor</h3>
+
+                    <form id="respostaForm" class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Justificativa / Análise de Causa</label>
+                            <textarea id="justificativa" rows="3" class="w-full rounded border-outline-variant"
+                                required></textarea>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Tratativa / Plano de Ação</label>
+                            <textarea id="tratativa" rows="3" class="w-full rounded border-outline-variant"
+                                required></textarea>
+                        </div>
+                        <button type="submit"
+                            class="bg-secondary text-white px-6 py-2 rounded font-bold hover:opacity-90">Salvar
+                            Tratativa (Encerrar)</button>
+                    </form>
+                </div>
+
+                <!-- Bloco Notificação Resolvida -->
+                <div id="blocoResolvido"
+                    class="hidden space-y-4 bg-surface-container-low p-6 rounded-lg border border-outline-variant/50">
+                    <h3 class="text-lg font-bold text-primary brand-font">Notificação Concluída</h3>
+                    <div class="text-sm space-y-3">
+                        <p><strong>Justificativa:</strong> <br><span id="fJust"
+                                class="text-on-surface-variant block mt-1"></span></p>
+                        <p><strong>Tratativa:</strong> <br><span id="fTrat"
+                                class="text-on-surface-variant block mt-1"></span></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        let currentUser = null;
+        let notifId = new URLSearchParams(window.location.search).get('id');
+
+        async function init() {
+            try {
+                const meRes = await apiFetch('/api/auth/me');
+                currentUser = await meRes.json();
+
+                document.getElementById('userNameHeader').innerText = currentUser.username;
+                document.getElementById('userRoleHeader').innerText = currentUser.setor;
+
+                loadNotificacao();
+            } catch (e) { console.error(e); }
+        }
+
+        async function loadNotificacao() {
+            const res = await apiFetch(`/api/notificacoes/${notifId}`);
+            const n = await res.json();
+
+            document.getElementById('tProto').innerText = "Protocolo " + n.protocolo_acompanhamento;
+            document.getElementById('tData').innerText = new Date(n.data_ocorrencia).toLocaleDateString('pt-BR') || n.data_ocorrencia;
+            document.getElementById('tStatus').innerText = n.status;
+            document.getElementById('tDesc').innerText = n.descricao_evento;
+            document.getElementById('tSetorNotif').innerText = n.setor_notificador;
+            document.getElementById('tAutor').innerText = n.usuario_notificador;
+            document.getElementById('tSetorSug').innerText = n.setor_sugerido;
+
+            if (n.caminho_arquivo_evidencia) {
+                const a = document.getElementById('tAnexo');
+                a.href = `/${n.caminho_arquivo_evidencia.replace('\\', '/')}`;
+                a.classList.remove('hidden');
+                document.getElementById('tSemAnexo').classList.add('hidden');
+            }
+
+            if (n.status === "Aguardando Triagem NSP" && currentUser.setor === "NSP") {
+                document.getElementById('blocoTriagem').classList.remove('hidden');
+                document.getElementById('setor_definitivo').value = n.setor_sugerido;
+            }
+
+            if (n.nivel_risco_calculado) {
+                document.getElementById('blocoTriagemResultado').classList.remove('hidden');
+                document.getElementById('rNivel').innerText = n.nivel_risco_calculado;
+                document.getElementById('rFreq').innerText = n.risco_frequencia;
+                document.getElementById('rImp').innerText = n.risco_impacto;
+                document.getElementById('rTipo').innerText = n.tipo_evento;
+                document.getElementById('rResp').innerText = n.setor_notificado_definitivo;
+            }
+
+            if (n.status === "Pendente no Setor" && n.setor_notificado_definitivo === currentUser.setor) {
+                document.getElementById('blocoResposta').classList.remove('hidden');
+            }
+
+            if (n.status === "Respondida" || n.status === "Encerrada") {
+                document.getElementById('blocoResolvido').classList.remove('hidden');
+                document.getElementById('fJust').innerText = n.justificativa_analise || "Sem justificativa";
+                document.getElementById('fTrat').innerText = n.tratativa_acao || "Encerrada via NSP. Não cabe notificação.";
+            }
+        }
+
+        async function salvarTriagem(encerrarDireto) {
+            const freqVal = parseInt(document.getElementById('freq').value);
+            const impVal = parseInt(document.getElementById('imp').value);
+
+            if (isNaN(freqVal) || freqVal < 1 || freqVal > 5) {
+                alert("A Frequência deve ser um número de 1 a 5.");
+                return;
+            }
+            if (isNaN(impVal) || impVal < 1 || impVal > 5) {
+                alert("O Impacto deve ser um número de 1 a 5.");
+                return;
+            }
+
+            const payload = {
+                tipo_evento: document.getElementById('tipo_evento').value,
+                setor_notificado_definitivo: document.getElementById('setor_definitivo').value,
+                risco_frequencia: freqVal,
+                risco_impacto: impVal,
+                status: encerrarDireto ? "Encerrada" : "Pendente no Setor"
+            };
+
+            const res = await apiFetch(`/api/notificacoes/${notifId}/triagem`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            if (res.ok) {
+                alert("Triagem salva com sucesso!");
+                window.location.reload();
+            } else {
+                alert("Erro ao salvar triagem.");
+            }
+        }
+
+        document.getElementById('respostaForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const payload = {
+                justificativa_analise: document.getElementById('justificativa').value,
+                tratativa_acao: document.getElementById('tratativa').value
+            };
+            const res = await apiFetch(`/api/notificacoes/${notifId}/resposta`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            if (res.ok) {
+                alert("Tratativa salva! Notificação encerrada.");
+                window.location.reload();
+            } else {
+                alert("Erro ao salvar tratativa.");
+            }
+        });
+
+        init();
+    </script>
+</body>
+
+</html>
