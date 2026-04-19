@@ -27,5 +27,7 @@ class Notificacao(Base):
     nivel_risco_calculado = Column(String, nullable=True)
     justificativa_analise = Column(Text, nullable=True)
     tratativa_acao = Column(Text, nullable=True)
+    data_triagem_nsp = Column(DateTime(timezone=True), nullable=True)
+    data_resposta_setor = Column(DateTime(timezone=True), nullable=True)
     data_criacao = Column(DateTime(timezone=True), server_default=func.now())
     data_atualizacao = Column(DateTime(timezone=True), onupdate=func.now())

@@ -123,6 +123,7 @@ def triagem_nsp(id: int, triagem: schemas.NotificacaoTriagem, db: Session = Depe
     notificacao.risco_frequencia = triagem.risco_frequencia
     notificacao.risco_impacto = triagem.risco_impacto
     notificacao.nivel_risco_calculado = calcular_nivel_risco(triagem.risco_frequencia, triagem.risco_impacto)
+    notificacao.data_triagem_nsp = datetime.now()
     
     # Pode ser que o NSP já decida encerrar (ex: "Não cabe notificação")
     notificacao.status = triagem.status
@@ -142,6 +143,7 @@ def resposta_setor(id: int, resposta: schemas.NotificacaoResposta, db: Session =
 
     notificacao.justificativa_analise = resposta.justificativa_analise
     notificacao.tratativa_acao = resposta.tratativa_acao
+    notificacao.data_resposta_setor = datetime.now()
     notificacao.status = "Respondida" # Fluxo encerra como Respondida nesta POC, conforme solicitado
     
     db.commit()

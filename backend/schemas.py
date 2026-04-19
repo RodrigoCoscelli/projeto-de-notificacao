@@ -56,6 +56,8 @@ class Notificacao(NotificacaoBase):
     nivel_risco_calculado: Optional[str] = None
     justificativa_analise: Optional[str] = None
     tratativa_acao: Optional[str] = None
+    data_triagem_nsp: Optional[datetime] = None
+    data_resposta_setor: Optional[datetime] = None
     data_criacao: datetime
     data_atualizacao: Optional[datetime] = None
 

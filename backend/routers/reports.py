@@ -30,13 +30,20 @@ def get_relatorio_powerbi(api_key: str = Depends(verify_api_key), db: Session = 
         resultado.append({
             "Protocolo": n.protocolo_acompanhamento,
             "Setor Notificador": n.setor_notificador,
-            "Data Ocorrencia": n.data_ocorrencia.strftime("%Y-%m-%d"),
+            "Setor Sugerido Inicial": n.setor_sugerido,
             "Setor Definitivo": n.setor_notificado_definitivo or n.setor_sugerido,
+            "Data Ocorrencia": n.data_ocorrencia.strftime("%Y-%m-%d"),
             "Tipo Evento": n.tipo_evento or "Não classificado",
             "Nivel Risco": n.nivel_risco_calculado or "N/A",
             "Status": n.status,
             "Dias Aberto": max(0, dias_aberto),
-            "Data Criacao": n.data_criacao.strftime("%Y-%m-%d %H:%M:%S")
+            "Data Criacao": n.data_criacao.strftime("%Y-%m-%d %H:%M:%S"),
+            "Data Atualizacao": n.data_atualizacao.strftime("%Y-%m-%d %H:%M:%S") if n.data_atualizacao else None,
+            "Data Triagem NSP": n.data_triagem_nsp.strftime("%Y-%m-%d %H:%M:%S") if n.data_triagem_nsp else None,
+            "Data Resposta Setor": n.data_resposta_setor.strftime("%Y-%m-%d %H:%M:%S") if n.data_resposta_setor else None,
+            "Descricao Evento": n.descricao_evento,
+            "Justificativa Analise": n.justificativa_analise,
+            "Tratativa Acao": n.tratativa_acao
         })
     
     return resultado
