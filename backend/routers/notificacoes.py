@@ -13,23 +13,17 @@ router = APIRouter(prefix="/api/notificacoes", tags=["notificacoes"])
 UPLOAD_DIR = "uploads"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
-def gerar_protocolo():
+def gerar_protocolo(db: Session):
     import random
     import string
-    random_str = ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
-    return f"AMB-{random_str}"
+    while True:
+        random_str = ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
+        protocolo = f"AMB-{random_str}"
+        # Verificar se já existe no banco
+        existe = db.query(models.Notificacao).filter(models.Notificacao.protocolo_acompanhamento == protocolo).first()
+        if not existe:
+            return protocolo
 
-def calcular_nivel_risco(freq: int, impacto: int) -> str:
-    # Matriz 5x5 simples: multiplicando os valores
-    score = freq * impacto
-    if score <= 4:
-        return "Baixo"
-    elif score <= 9:
-        return "Médio"
-    elif score <= 16:
-        return "Alto"
-    else:
-        return "Crítico"
 
 from datetime import datetime
 
@@ -40,25 +34,32 @@ def criar_notificacao(
     setor_sugerido: str = Form(...),
     anonimo: bool = Form(False),
     arquivo: Optional[UploadFile] = File(None),
+    produto_descricao: Optional[str] = Form(None),
+    produto_codigo: Optional[str] = Form(None),
+    produto_fabricante: Optional[str] = Form(None),
+    produto_registro_ms: Optional[str] = Form(None),
+    produto_lote_serie: Optional[str] = Form(None),
+    produto_validade: Optional[str] = Form(None),
     db: Session = Depends(database.get_db),
     current_user: models.Usuario = Depends(get_current_user)
 ):
     # Tratar upload se existir
     file_path = None
     if arquivo:
-        filename = f"{uuid.uuid4()}_{arquivo.filename}"
+        filename = f"{arquivo.filename}"
         file_path = os.path.join(UPLOAD_DIR, filename)
         with open(file_path, "wb") as buffer:
             shutil.copyfileobj(arquivo.file, buffer)
 
-    protocolo = gerar_protocolo()
+    protocolo = gerar_protocolo(db)
     
     # Determinar autor: anônimo ou usuário logado
-    setor_notif = current_user.setor
     if anonimo:
         usuario_notif = "Anônimo"
+        setor_notif = "Anônimo"
     else:
         usuario_notif = current_user.username
+        setor_notif = current_user.setor
     
     # Converter string (YYYY-MM-DD) para date
     dt_ocorrencia = datetime.strptime(data_ocorrencia, "%Y-%m-%d").date()
@@ -71,7 +72,13 @@ def criar_notificacao(
         descricao_evento=descricao_evento,
         setor_sugerido=setor_sugerido,
         caminho_arquivo_evidencia=file_path,
-        status="Aguardando Triagem NSP"
+        status="Aguardando Triagem NSP",
+        produto_descricao=produto_descricao,
+        produto_codigo=produto_codigo,
+        produto_fabricante=produto_fabricante,
+        produto_registro_ms=produto_registro_ms,
+        produto_lote_serie=produto_lote_serie,
+        produto_validade=produto_validade
     )
     db.add(db_notificacao)
     db.commit()
@@ -120,12 +127,15 @@ def triagem_nsp(id: int, triagem: schemas.NotificacaoTriagem, db: Session = Depe
 
     notificacao.tipo_evento = triagem.tipo_evento
     notificacao.setor_notificado_definitivo = triagem.setor_notificado_definitivo
-    notificacao.risco_frequencia = triagem.risco_frequencia
-    notificacao.risco_impacto = triagem.risco_impacto
-    notificacao.nivel_risco_calculado = calcular_nivel_risco(triagem.risco_frequencia, triagem.risco_impacto)
+    notificacao.classificacao_risco = triagem.classificacao_risco
+    notificacao.classificacao_meta_internacional = triagem.classificacao_meta_internacional
     
-    # Pode ser que o NSP já decida encerrar (ex: "Não cabe notificação")
+    # Se o NSP encerrar diretamente, salva o motivo de encerramento
+    if triagem.motivo_encerramento:
+        notificacao.motivo_encerramento = triagem.motivo_encerramento
+    
     notificacao.status = triagem.status
+    notificacao.data_triagem_nsp = datetime.now()
     
     db.commit()
     db.refresh(notificacao)
@@ -142,7 +152,8 @@ def resposta_setor(id: int, resposta: schemas.NotificacaoResposta, db: Session =
 
     notificacao.justificativa_analise = resposta.justificativa_analise
     notificacao.tratativa_acao = resposta.tratativa_acao
-    notificacao.status = "Respondida" # Fluxo encerra como Respondida nesta POC, conforme solicitado
+    notificacao.status = "Respondida"
+    notificacao.data_resposta_setor = datetime.now()
     
     db.commit()
     db.refresh(notificacao)

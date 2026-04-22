@@ -110,6 +110,20 @@
                     </div>
                 </div>
 
+                <!-- Dados do Produto (Opcional) -->
+                <div id="blocoProduto"
+                    class="hidden bg-secondary-fixed/5 p-4 rounded text-sm mb-6 border border-secondary-fixed/20">
+                    <strong class="text-secondary">Material / Medicamento / Equipamento:</strong> <br>
+                    <div class="grid grid-cols-2 gap-x-4 gap-y-1 mt-2">
+                        <div><strong>Descrição:</strong> <span id="pDesc"></span></div>
+                        <div><strong>Código:</strong> <span id="pCod"></span></div>
+                        <div><strong>Fabricante:</strong> <span id="pFab"></span></div>
+                        <div><strong>MS Nº:</strong> <span id="pMS"></span></div>
+                        <div><strong>Série/Lote:</strong> <span id="pLote"></span></div>
+                        <div><strong>Validade:</strong> <span id="pVal"></span></div>
+                    </div>
+                </div>
+
                 <hr class="my-8 border-outline-variant/30">
 
                 <!-- Bloco para NSP fazer Triagem -->
@@ -118,13 +132,16 @@
                         NSP</h3>
                     <form id="triagemForm" class="grid grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-sm font-medium mb-1">Classificação do Evento</label>
-                            <select id="tipo_evento" class="w-full rounded border-outline-variant" required>
-                                <option value="Near Miss/Quase Falha">Near Miss / Quase Falha</option>
-                                <option value="Incidente sem dano">Incidente sem dano</option>
-                                <option value="Incidente com dano">Incidente com dano</option>
-                                <option value="Evento Sentinela">Evento Sentinela</option>
+                            <label class="block text-sm font-medium mb-1">Tipo do Evento</label>
+                            <select id="tipo_evento" class="w-full rounded border-outline-variant" required
+                                onchange="atualizarLegendaTipo()">
+                                <option value="">Selecione...</option>
+                                <option value="Evento clínico">Evento clínico</option>
+                                <option value="Evento não clínico">Evento não clínico</option>
+                                <option value="Tecnovigilância">Tecnovigilância</option>
+                                <option value="Farmacovigilância">Farmacovigilância</option>
                             </select>
+                            <p id="legenda_tipo" class="text-[11px] text-on-surface-variant mt-1 italic"></p>
                         </div>
                         <div>
                             <label class="block text-sm font-medium mb-1">Setor Responsável Definitivo</label>
@@ -136,20 +153,40 @@
                             </select>
                         </div>
                         <div>
-                            <label class="block text-sm font-medium mb-1">Frequência (1 a 5)</label>
-                            <input type="number" id="freq" min="1" max="5" class="w-full rounded border-outline-variant"
-                                required>
+                            <label class="block text-sm font-medium mb-1">Classificação de Risco do Evento</label>
+                            <select id="classificacao_risco" class="w-full rounded border-outline-variant" required>
+                                <option value="">Selecione...</option>
+                                <option value="Near miss">Near miss</option>
+                                <option value="Incidente sem dano">Incidente sem dano</option>
+                                <option value="Evento Adverso leve">Evento Adverso leve</option>
+                                <option value="Evento Adverso moderado">Evento Adverso moderado</option>
+                                <option value="Evento Adverso grave">Evento Adverso grave</option>
+                                <option value="Óbito/Never Events">Óbito/Never Events
+                                </option>
+                                <option value="Outros">Outros</option>
+                            </select>
                         </div>
                         <div>
-                            <label class="block text-sm font-medium mb-1">Impacto (1 a 5)</label>
-                            <input type="number" id="imp" min="1" max="5" class="w-full rounded border-outline-variant"
-                                required>
+                            <label class="block text-sm font-medium mb-1">Classificação da Meta Internacional</label>
+                            <select id="classificacao_meta" class="w-full rounded border-outline-variant" required>
+                                <option value="">Selecione...</option>
+                                <option value="Identificação correta do paciente">Identificação correta do paciente
+                                </option>
+                                <option value="Segurança da comunicação">Segurança da comunicação</option>
+                                <option value="Segurança na utilização da medicação">Segurança na utilização da
+                                    medicação</option>
+                                <option value="Segurança cirúrgica">Segurança cirúrgica</option>
+                                <option value="Reduzir risco de infecção/Higienização das mãos">Reduzir risco de
+                                    infecção/Higienização das mãos</option>
+                                <option value="Prevenção de ocorrência de quedas">Prevenção de ocorrência de quedas
+                                </option>
+                            </select>
                         </div>
                         <div class="col-span-2 pt-2 flex items-center space-x-4">
                             <button type="button" onclick="salvarTriagem(false)"
                                 class="bg-primary text-white px-6 py-2 rounded font-bold hover:opacity-90">Enviar para
                                 Setor</button>
-                            <button type="button" onclick="salvarTriagem(true)"
+                            <button type="button" onclick="abrirModalEncerramento()"
                                 class="bg-error text-white px-6 py-2 rounded font-bold hover:opacity-90">Encerrar
                                 Notificação Imediatamente</button>
                         </div>
@@ -160,9 +197,9 @@
                 <div id="blocoTriagemResultado"
                     class="hidden bg-surface-container-low p-4 rounded text-sm mb-6 border border-outline-variant/30">
                     <strong>Análise do NSP:</strong> <br>
-                    Nível de Risco: <span class="text-primary font-bold" id="rNivel"></span> (Freq: <span
-                        id="rFreq"></span>, Imp: <span id="rImp"></span>)<br>
-                    Tipo: <span class="font-semibold" id="rTipo"></span><br>
+                    Tipo do Evento: <span class="font-semibold" id="rTipo"></span><br>
+                    Classificação de Risco: <span class="text-primary font-bold" id="rClassRisco"></span><br>
+                    Meta Internacional: <span class="font-semibold" id="rMeta"></span><br>
                     Setor Responsável: <span class="font-semibold" id="rResp"></span>
                 </div>
 
@@ -193,6 +230,11 @@
                     class="hidden space-y-4 bg-surface-container-low p-6 rounded-lg border border-outline-variant/50">
                     <h3 class="text-lg font-bold text-primary brand-font">Notificação Concluída</h3>
                     <div class="text-sm space-y-3">
+                        <div id="blocoMotivo" class="hidden">
+                            <p><strong>Motivo do Encerramento (NSP):</strong> <br><span id="fMotivo"
+                                    class="text-on-surface-variant block mt-1 p-3 bg-error/5 border border-error/20 rounded"></span>
+                            </p>
+                        </div>
                         <p><strong>Justificativa:</strong> <br><span id="fJust"
                                 class="text-on-surface-variant block mt-1"></span></p>
                         <p><strong>Tratativa:</strong> <br><span id="fTrat"
@@ -203,9 +245,41 @@
         </div>
     </main>
 
+    <!-- Modal de Encerramento -->
+    <div id="modalEncerramento" class="hidden fixed inset-0 z-[100] flex items-center justify-center">
+        <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="fecharModalEncerramento()"></div>
+        <div class="relative bg-white rounded-xl shadow-2xl p-8 max-w-lg w-full mx-4 animate-[fadeIn_0.2s_ease-out]">
+            <h3 class="text-xl font-bold text-error brand-font mb-2">Encerrar Notificação</h3>
+            <p class="text-sm text-on-surface-variant mb-4">Informe o motivo pelo qual esta notificação está sendo
+                encerrada.</p>
+            <textarea id="motivo_encerramento" rows="4" class="w-full rounded-lg border-outline-variant px-4 py-2 mb-4"
+                placeholder="Ex: Não se aplica como notificação de evento adverso..."></textarea>
+            <div class="flex justify-end space-x-3">
+                <button type="button" onclick="fecharModalEncerramento()"
+                    class="px-5 py-2 rounded-lg border border-outline-variant text-on-surface font-medium hover:bg-surface-container">Cancelar</button>
+                <button type="button" onclick="confirmarEncerramento()"
+                    class="px-5 py-2 rounded-lg bg-error text-white font-bold hover:opacity-90">Confirmar
+                    Encerramento</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         let currentUser = null;
         let notifId = new URLSearchParams(window.location.search).get('id');
+
+        const explicacoesEvento = {
+            "Evento clínico": "Ocorrência inesperada decorrente das atividades assistenciais envolvendo lesão clínica ou psicológica do paciente.",
+            "Evento não clínico": "Ocorrência inesperada de Procedimentos e Práticas que não envolve a Assistência ao Paciente.",
+            "Farmacovigilância": "Ocorrência relacionada ao uso de medicamentos tais como reação alérgica e desvio de qualidade.",
+            "Tecnovigilância": "Ocorrência relacionada à materiais e equipamentos."
+        };
+
+        function atualizarLegendaTipo() {
+            const val = document.getElementById('tipo_evento').value;
+            const legenda = document.getElementById('legenda_tipo');
+            legenda.innerText = explicacoesEvento[val] || "";
+        }
 
         async function init() {
             try {
@@ -231,6 +305,16 @@
             document.getElementById('tAutor').innerText = n.usuario_notificador;
             document.getElementById('tSetorSug').innerText = n.setor_sugerido;
 
+            if (n.produto_descricao) {
+                document.getElementById('blocoProduto').classList.remove('hidden');
+                document.getElementById('pDesc').innerText = n.produto_descricao;
+                document.getElementById('pCod').innerText = n.produto_codigo || '-';
+                document.getElementById('pFab').innerText = n.produto_fabricante || '-';
+                document.getElementById('pMS').innerText = n.produto_registro_ms || '-';
+                document.getElementById('pLote').innerText = n.produto_lote_serie || '-';
+                document.getElementById('pVal').innerText = n.produto_validade || '-';
+            }
+
             if (n.caminho_arquivo_evidencia) {
                 const a = document.getElementById('tAnexo');
                 a.href = `/${n.caminho_arquivo_evidencia.replace('\\', '/')}`;
@@ -243,12 +327,12 @@
                 document.getElementById('setor_definitivo').value = n.setor_sugerido;
             }
 
-            if (n.nivel_risco_calculado) {
+            if (n.tipo_evento) {
                 document.getElementById('blocoTriagemResultado').classList.remove('hidden');
-                document.getElementById('rNivel').innerText = n.nivel_risco_calculado;
-                document.getElementById('rFreq').innerText = n.risco_frequencia;
-                document.getElementById('rImp').innerText = n.risco_impacto;
-                document.getElementById('rTipo').innerText = n.tipo_evento;
+                const explicacao = explicacoesEvento[n.tipo_evento] ? ` - ${explicacoesEvento[n.tipo_evento]}` : "";
+                document.getElementById('rTipo').innerText = n.tipo_evento + explicacao;
+                document.getElementById('rClassRisco').innerText = n.classificacao_risco || '-';
+                document.getElementById('rMeta').innerText = n.classificacao_meta_internacional || '-';
                 document.getElementById('rResp').innerText = n.setor_notificado_definitivo;
             }
 
@@ -258,31 +342,60 @@
 
             if (n.status === "Respondida" || n.status === "Encerrada") {
                 document.getElementById('blocoResolvido').classList.remove('hidden');
+                if (n.motivo_encerramento) {
+                    document.getElementById('blocoMotivo').classList.remove('hidden');
+                    document.getElementById('fMotivo').innerText = n.motivo_encerramento;
+                }
                 document.getElementById('fJust').innerText = n.justificativa_analise || "Sem justificativa";
-                document.getElementById('fTrat').innerText = n.tratativa_acao || "Encerrada via NSP. Não cabe notificação.";
+                document.getElementById('fTrat').innerText = n.tratativa_acao || "Encerrada via NSP.";
             }
         }
 
-        async function salvarTriagem(encerrarDireto) {
-            const freqVal = parseInt(document.getElementById('freq').value);
-            const impVal = parseInt(document.getElementById('imp').value);
+        function validarCamposTriagem() {
+            const tipoEvento = document.getElementById('tipo_evento').value;
+            const classRisco = document.getElementById('classificacao_risco').value;
+            const classMeta = document.getElementById('classificacao_meta').value;
 
-            if (isNaN(freqVal) || freqVal < 1 || freqVal > 5) {
-                alert("A Frequência deve ser um número de 1 a 5.");
+            if (!tipoEvento) { alert("Selecione o Tipo do Evento."); return false; }
+            if (!classRisco) { alert("Selecione a Classificação de Risco do Evento."); return false; }
+            if (!classMeta) { alert("Selecione a Classificação da Meta Internacional."); return false; }
+            return true;
+        }
+
+        function abrirModalEncerramento() {
+            if (!validarCamposTriagem()) return;
+            document.getElementById('modalEncerramento').classList.remove('hidden');
+        }
+
+        function fecharModalEncerramento() {
+            document.getElementById('modalEncerramento').classList.add('hidden');
+            document.getElementById('motivo_encerramento').value = '';
+        }
+
+        async function confirmarEncerramento() {
+            const motivo = document.getElementById('motivo_encerramento').value.trim();
+            if (!motivo) {
+                alert("Informe o motivo do encerramento.");
                 return;
             }
-            if (isNaN(impVal) || impVal < 1 || impVal > 5) {
-                alert("O Impacto deve ser um número de 1 a 5.");
-                return;
-            }
+            fecharModalEncerramento();
+            await salvarTriagem(true, motivo);
+        }
+
+        async function salvarTriagem(encerrarDireto, motivoEncerramento = null) {
+            if (!validarCamposTriagem()) return;
 
             const payload = {
                 tipo_evento: document.getElementById('tipo_evento').value,
                 setor_notificado_definitivo: document.getElementById('setor_definitivo').value,
-                risco_frequencia: freqVal,
-                risco_impacto: impVal,
+                classificacao_risco: document.getElementById('classificacao_risco').value,
+                classificacao_meta_internacional: document.getElementById('classificacao_meta').value,
                 status: encerrarDireto ? "Encerrada" : "Pendente no Setor"
             };
+
+            if (motivoEncerramento) {
+                payload.motivo_encerramento = motivoEncerramento;
+            }
 
             const res = await apiFetch(`/api/notificacoes/${notifId}/triagem`, {
                 method: 'PUT',

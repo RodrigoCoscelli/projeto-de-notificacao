@@ -19,6 +19,13 @@ class NotificacaoBase(BaseModel):
     data_ocorrencia: date
     descricao_evento: str
     setor_sugerido: str
+    # Campos opcionais de produto
+    produto_descricao: Optional[str] = None
+    produto_codigo: Optional[str] = None
+    produto_fabricante: Optional[str] = None
+    produto_registro_ms: Optional[str] = None
+    produto_lote_serie: Optional[str] = None
+    produto_validade: Optional[str] = None
 
 class NotificacaoCreateAnonima(NotificacaoBase):
     # Apenas os campos base + anonimato tratado no endpoint
@@ -27,8 +34,9 @@ class NotificacaoCreateAnonima(NotificacaoBase):
 class NotificacaoTriagem(BaseModel):
     setor_notificado_definitivo: str
     tipo_evento: str
-    risco_frequencia: int
-    risco_impacto: int
+    classificacao_risco: str
+    classificacao_meta_internacional: str
+    motivo_encerramento: Optional[str] = None
     # O NSP pode encerrar diretamente passando status Encerrada
     status: Optional[str] = "Pendente no Setor"
 
@@ -50,14 +58,21 @@ class Notificacao(NotificacaoBase):
     caminho_arquivo_evidencia: Optional[str] = None
     setor_notificado_definitivo: Optional[str] = None
     tipo_evento: Optional[str] = None
+    classificacao_risco: Optional[str] = None
+    classificacao_meta_internacional: Optional[str] = None
     status: str
-    risco_frequencia: Optional[int] = None
-    risco_impacto: Optional[int] = None
-    nivel_risco_calculado: Optional[str] = None
     justificativa_analise: Optional[str] = None
     tratativa_acao: Optional[str] = None
+    motivo_encerramento: Optional[str] = None
+    produto_descricao: Optional[str] = None
+    produto_codigo: Optional[str] = None
+    produto_fabricante: Optional[str] = None
+    produto_registro_ms: Optional[str] = None
+    produto_lote_serie: Optional[str] = None
+    produto_validade: Optional[str] = None
     data_criacao: datetime
-    data_atualizacao: Optional[datetime] = None
+    data_triagem_nsp: Optional[datetime] = None
+    data_resposta_setor: Optional[datetime] = None
 
     class Config:
         orm_mode = True

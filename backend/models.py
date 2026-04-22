@@ -22,10 +22,21 @@ class Notificacao(Base):
     setor_notificado_definitivo = Column(String, nullable=True)
     tipo_evento = Column(String, nullable=True)
     status = Column(String, nullable=False, default="Aguardando Triagem NSP")
-    risco_frequencia = Column(Integer, nullable=True)
-    risco_impacto = Column(Integer, nullable=True)
-    nivel_risco_calculado = Column(String, nullable=True)
+    classificacao_risco = Column(String, nullable=True)
+    classificacao_meta_internacional = Column(String, nullable=True)
     justificativa_analise = Column(Text, nullable=True)
     tratativa_acao = Column(Text, nullable=True)
+    motivo_encerramento = Column(Text, nullable=True)
+    
+    # Campos para Material/Medicamento/Equipamento
+
+    produto_descricao = Column(String, nullable=True)
+    produto_codigo = Column(String, nullable=True)
+    produto_fabricante = Column(String, nullable=True)
+    produto_registro_ms = Column(String, nullable=True)
+    produto_lote_serie = Column(String, nullable=True)
+    produto_validade = Column(String, nullable=True)
+    
     data_criacao = Column(DateTime(timezone=True), server_default=func.now())
-    data_atualizacao = Column(DateTime(timezone=True), onupdate=func.now())
+    data_triagem_nsp = Column(DateTime(timezone=True), nullable=True)
+    data_resposta_setor = Column(DateTime(timezone=True), nullable=True)
