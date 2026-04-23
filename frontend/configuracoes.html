@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configurações - Notifica AME PG</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap"
+        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet">
+    <script src="/js/app.js"></script>
+    <script>tailwind.config = window.tailwindConfig;</script>
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        h1,
+        h2,
+        h3,
+        .brand-font {
+            font-family: 'Manrope', sans-serif;
+        }
+    </style>
+</head>
+
+<body class="bg-surface text-on-surface flex min-h-screen hidden" id="pageBody">
+
+    <aside class="h-screen w-64 fixed left-0 top-0 bg-[#001B3D] flex flex-col py-8 space-y-2 z-50">
+        <div class="px-6 mb-8">
+            <div class="flex items-center gap-3">
+                <div
+                    class="w-10 h-10 rounded-lg bg-primary-container flex items-center justify-center text-white overflow-hidden">
+                    <span class="material-symbols-outlined">local_hospital</span>
+                </div>
+                <div>
+                    <div class="text-[#FFFFFF] font-bold text-lg brand-font">AME PG</div>
+                    <div class="text-[#D6E3FF]/60 text-xs font-medium uppercase tracking-wider">Qualidade</div>
+                </div>
+            </div>
+        </div>
+        <nav class="flex-1 space-y-1">
+            <a class="text-[#D6E3FF]/70 hover:text-white hover:bg-white/10 rounded-full mx-4 py-3 flex items-center px-4 transition-all"
+                href="/dashboard.html">
+                <span class="material-symbols-outlined mr-3">dashboard</span>
+                <span class="text-sm font-label">Painel</span>
+            </a>
+            <a class="text-[#D6E3FF]/70 hover:text-white hover:bg-white/10 rounded-full mx-4 py-3 flex items-center px-4 transition-all"
+                href="/nova_notificacao.html">
+                <span class="material-symbols-outlined mr-3">add_circle</span>
+                <span class="text-sm font-label">Criar Notificação</span>
+            </a>
+            <a class="bg-[#D6E3FF] text-[#001B3D] rounded-full mx-4 py-3 font-bold flex items-center px-4 transition-all"
+                href="/configuracoes.html">
+                <span class="material-symbols-outlined mr-3">settings</span>
+                <span class="text-sm font-label">Configurações</span>
+            </a>
+        </nav>
+        <div class="pt-4 border-t border-white/10 space-y-1">
+            <a onclick="logout()"
+                class="cursor-pointer text-error-container/80 hover:text-error-container hover:bg-white/10 rounded-full mx-4 py-3 flex items-center px-4 transition-all">
+                <span class="material-symbols-outlined mr-3">logout</span>
+                <span class="text-sm font-label">Sair</span>
+            </a>
+        </div>
+    </aside>
+
+    <main class="flex-1 ml-64 flex flex-col">
+        <header
+            class="fixed top-0 right-0 left-64 h-16 bg-white/80 backdrop-blur-xl flex justify-between items-center px-8 z-40 shadow-sm border-b border-surface-container">
+            <h1 class="text-xl font-bold tracking-tight text-[#001B3D] brand-font">Configurações</h1>
+            <div class="flex items-center space-x-3 pl-4">
+                <div class="text-right">
+                    <p class="text-sm font-semibold text-on-surface leading-tight" id="userNameHeader">Carregando...</p>
+                    <p class="text-[11px] text-on-surface-variant leading-tight" id="userRoleHeader">Setor</p>
+                </div>
+            </div>
+        </header>
+
+        <div class="mt-16 p-8 space-y-8 max-w-5xl mx-auto w-full">
+
+            <!-- Meu Perfil -->
+            <div
+                class="bg-surface-container-lowest rounded-xl shadow-sm border border-surface-container overflow-hidden">
+                <div class="p-6 border-b border-surface-container bg-surface-container-low/50">
+                    <h2 class="text-lg font-bold text-primary brand-font flex items-center">
+                        <span class="material-symbols-outlined mr-2">person</span>
+                        Meu Perfil
+                    </h2>
+                    <p class="text-sm text-on-surface-variant mt-1">Altere seu nome de usuário (login) ou senha.</p>
+                </div>
+                <div class="p-6">
+                    <form id="profileForm" class="space-y-4 max-w-md">
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Novo Username</label>
+                            <input type="text" id="me_username"
+                                class="w-full rounded-lg border-outline-variant px-4 py-2"
+                                placeholder="Deixe em branco para não alterar">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Nova Senha</label>
+                            <input type="password" id="me_password"
+                                class="w-full rounded-lg border-outline-variant px-4 py-2"
+                                placeholder="Deixe em branco para não alterar">
+                        </div>
+                        <button type="submit"
+                            class="bg-primary text-white px-6 py-2 rounded-lg font-bold hover:opacity-90 transition-opacity">Salvar
+                            Alterações</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Gerenciamento de Usuários (NSP) -->
+            <div id="adminPanel"
+                class="hidden bg-surface-container-lowest rounded-xl shadow-sm border border-surface-container overflow-hidden">
+                <div class="p-6 border-b border-surface-container bg-surface-container-low/50">
+                    <h2 class="text-lg font-bold text-error brand-font flex items-center">
+                        <span class="material-symbols-outlined mr-2">manage_accounts</span>
+                        Gerenciamento de Usuários (Apenas NSP)
+                    </h2>
+                    <p class="text-sm text-on-surface-variant mt-1">Crie ou remova acessos ao sistema.</p>
+                </div>
+
+                <div class="p-6 grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <!-- Novo Usuário -->
+                    <div class="md:col-span-1">
+                        <h3 class="font-bold mb-4 text-on-surface border-b pb-2">Cadastrar Novo Usuário</h3>
+                        <form id="newUserForm" class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium mb-1">Username (Login)</label>
+                                <input type="text" id="new_username"
+                                    class="w-full rounded-lg border-outline-variant px-4 py-2" required>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-1">Setor</label>
+                                <select id="new_setor" class="w-full rounded-lg border-outline-variant px-4 py-2"
+                                    required>
+                                    <option value="">Selecione...</option>
+                                    <option value="NSP">NSP</option>
+                                    <option value="Recepção">Recepção</option>
+                                    <option value="Enfermagem">Enfermagem</option>
+                                    <option value="Farmácia">Farmácia</option>
+                                    <option value="Centro Cirúrgico">Centro Cirúrgico</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-1">Senha Inicial</label>
+                                <input type="password" id="new_password"
+                                    class="w-full rounded-lg border-outline-variant px-4 py-2" required>
+                            </div>
+                            <button type="submit"
+                                class="w-full bg-secondary text-white py-2 rounded-lg font-bold hover:opacity-90">Criar
+                                Usuário</button>
+                        </form>
+                    </div>
+
+                    <!-- Lista de Usuários -->
+                    <div class="md:col-span-2">
+                        <h3 class="font-bold mb-4 text-on-surface border-b pb-2">Usuários Cadastrados</h3>
+                        <div class="overflow-x-auto border border-surface-container rounded-lg">
+                            <table class="w-full text-left border-collapse">
+                                <thead
+                                    class="bg-surface-container-low text-xs font-bold text-on-surface-variant uppercase tracking-wider">
+                                    <tr>
+                                        <th class="px-4 py-3">ID</th>
+                                        <th class="px-4 py-3">Username</th>
+                                        <th class="px-4 py-3">Setor</th>
+                                        <th class="px-4 py-3 text-right">Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-surface-container text-sm" id="usersTableBody">
+                                    <tr>
+                                        <td colspan="4" class="px-4 py-4 text-center text-on-surface-variant">
+                                            Carregando...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <script>
+        let currentUser = null;
+
+        async function init() {
+            try {
+                const meRes = await apiFetch('/api/auth/me');
+                if (!meRes.ok) throw new Error('Não autenticado');
+                currentUser = await meRes.json();
+
+                document.getElementById('userNameHeader').innerText = currentUser.username;
+                document.getElementById('userRoleHeader').innerText = currentUser.setor;
+                document.getElementById('pageBody').classList.remove('hidden');
+
+                if (currentUser.setor === 'NSP') {
+                    document.getElementById('adminPanel').classList.remove('hidden');
+                    loadUsers();
+                }
+            } catch (e) {
+                window.location.href = '/login.html';
+            }
+        }
+
+        document.getElementById('profileForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('me_username').value.trim();
+            const password = document.getElementById('me_password').value.trim();
+
+            const payload = {};
+            if (username) payload.username = username;
+            if (password) payload.password = password;
+
+            if (Object.keys(payload).length === 0) {
+                alert("Nenhuma alteração informada.");
+                return;
+            }
+
+            try {
+                const res = await apiFetch('/api/users/me', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (res.ok) {
+                    alert("Perfil atualizado com sucesso! Faça login novamente caso tenha alterado o username ou senha.");
+                    if (username || password) {
+                        logout();
+                    } else {
+                        window.location.reload();
+                    }
+                } else {
+                    const errorData = await res.json();
+                    alert("Erro: " + (errorData.detail || "Não foi possível atualizar"));
+                }
+            } catch (e) {
+                alert("Erro de conexão");
+            }
+        });
+
+        // Funções para Admin NSP
+        async function loadUsers() {
+            try {
+                const res = await apiFetch('/api/users');
+                if (!res.ok) return;
+                const users = await res.json();
+
+                const tbody = document.getElementById('usersTableBody');
+                tbody.innerHTML = '';
+
+                users.forEach(u => {
+                    const isMe = u.id === currentUser.id;
+                    const tr = document.createElement('tr');
+                    tr.className = "hover:bg-surface-container-low transition-colors";
+                    tr.innerHTML = `
+                        <td class="px-4 py-3 font-mono text-xs text-on-surface-variant">${u.id}</td>
+                        <td class="px-4 py-3 font-bold ${isMe ? 'text-primary' : ''}">${u.username} ${isMe ? '(Você)' : ''}</td>
+                        <td class="px-4 py-3">
+                            <span class="px-2 py-1 bg-surface-variant rounded text-[11px] font-bold">${u.setor}</span>
+                        </td>
+                        <td class="px-4 py-3 text-right">
+                            <button onclick="deleteUser(${u.id}, '${u.username}')" class="text-error hover:bg-error/10 p-1.5 rounded transition-colors ${isMe ? 'opacity-50 cursor-not-allowed' : ''}" ${isMe ? 'disabled' : ''} title="Excluir Usuário">
+                                <span class="material-symbols-outlined text-sm">delete</span>
+                            </button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            } catch (e) {
+                console.error(e);
+            }
+        }
+        document.getElementById('newUserForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const payload = {
+                username: document.getElementById('new_username').value.trim(),
+                setor: document.getElementById('new_setor').value,
+                password: document.getElementById('new_password').value
+            };
+
+            try {
+                const res = await apiFetch('/api/users', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                
+                if (res.ok) {
+                    alert("Usuário criado com sucesso!");
+                    document.getElementById('newUserForm').reset();
+                    loadUsers();
+                } else {
+                    const errorData = await res.json();
+                    alert("Erro: " + (errorData.detail || "Não foi possível criar o usuário"));
+                }
+            } catch (e) {
+                alert("Erro de conexão");
+            }
+        });
+
+        async function deleteUser(id, username) {
+            if (!confirm(`Tem certeza que deseja excluir o usuário '${username}'?`)) return;
+            
+            try {
+                const res = await apiFetch(`/api/users/${id}`, { method: 'DELETE' });
+                if (res.ok) {
+                    loadUsers();
+                } else {
+                    const errorData = await res.json();
+                    alert("Erro ao excluir: " + (errorData.detail || ""));
+                }
+            } catch (e) {
+                alert("Erro de conexão");
+            }
+        }
+
+        init();
+    </script>
+</body>
+
+</html>

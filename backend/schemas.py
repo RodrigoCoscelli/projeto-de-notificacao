@@ -15,6 +15,11 @@ class Usuario(UsuarioBase):
         orm_mode = True
         from_attributes = True
 
+class UsuarioUpdate(BaseModel):
+    username: Optional[str] = None
+    password: Optional[str] = None
+
+
 class NotificacaoBase(BaseModel):
     data_ocorrencia: date
     descricao_evento: str

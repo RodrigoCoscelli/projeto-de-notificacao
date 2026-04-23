@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
 from . import models, database
-from .routers import auth, notificacoes, reports
+from .routers import auth, notificacoes, reports, users
 
 app = FastAPI(title="Notifica AME PG API")
 
@@ -22,6 +22,7 @@ app.add_middleware(
 app.include_router(auth.router)
 app.include_router(notificacoes.router)
 app.include_router(reports.router)
+app.include_router(users.router)
 
 # Montar arquivos estáticos
 app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
