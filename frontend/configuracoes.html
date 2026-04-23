@@ -134,7 +134,7 @@
                         <h3 class="font-bold mb-4 text-on-surface border-b pb-2">Cadastrar Novo Usuário</h3>
                         <form id="newUserForm" class="space-y-4">
                             <div>
-                                <label class="block text-sm font-medium mb-1">Username (Login)</label>
+                                <label class="block text-sm font-medium mb-1">Usuário (Login)</label>
                                 <input type="text" id="new_username"
                                     class="w-full rounded-lg border-outline-variant px-4 py-2" required>
                             </div>
@@ -170,7 +170,7 @@
                                     class="bg-surface-container-low text-xs font-bold text-on-surface-variant uppercase tracking-wider">
                                     <tr>
                                         <th class="px-4 py-3">ID</th>
-                                        <th class="px-4 py-3">Username</th>
+                                        <th class="px-4 py-3">Usuário</th>
                                         <th class="px-4 py-3">Setor</th>
                                         <th class="px-4 py-3 text-right">Ações</th>
                                     </tr>
@@ -295,7 +295,7 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
                 });
-                
+
                 if (res.ok) {
                     alert("Usuário criado com sucesso!");
                     document.getElementById('newUserForm').reset();
@@ -311,7 +311,7 @@
 
         async function deleteUser(id, username) {
             if (!confirm(`Tem certeza que deseja excluir o usuário '${username}'?`)) return;
-            
+
             try {
                 const res = await apiFetch(`/api/users/${id}`, { method: 'DELETE' });
                 if (res.ok) {
