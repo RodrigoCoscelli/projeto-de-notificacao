@@ -128,7 +128,7 @@
                             <tr class="bg-surface-container-low">
                                 <th class="px-8 py-4 text-xs font-bold text-on-surface-variant uppercase tracking-wider">Protocolo</th>
                                 <th class="px-8 py-4 text-xs font-bold text-on-surface-variant uppercase tracking-wider">Ocorrência</th>
-                                <th class="px-8 py-4 text-xs font-bold text-on-surface-variant uppercase tracking-wider">Setor Referência</th>
+                                <th class="px-8 py-4 text-xs font-bold text-on-surface-variant uppercase tracking-wider">Setor Notificado</th>
                                 <th class="px-8 py-4 text-xs font-bold text-on-surface-variant uppercase tracking-wider">Status</th>
                                 <th class="px-8 py-4 text-xs font-bold text-on-surface-variant uppercase tracking-wider">Visualizar</th>
                             </tr>
@@ -185,7 +185,7 @@
                     <td class="px-8 py-4">
                         <div class="text-sm text-on-surface truncate max-w-xs">${n.descricao_evento}</div>
                     </td>
-                    <td class="px-8 py-4 whitespace-nowrap text-sm font-semibold">${n.setor_sugerido}</td>
+                    <td class="px-8 py-4 whitespace-nowrap text-sm font-semibold">${n.setor_notificado_definitivo || n.setor_sugerido}</td>
                     
                     <td class="px-8 py-4 whitespace-nowrap">
                         <span class="text-[10px] font-bold px-2 py-1 rounded bg-surface-variant">${n.status}</span>

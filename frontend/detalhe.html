@@ -106,7 +106,7 @@
                     </div>
                     <div><strong>Setor Notificador:</strong> <span id="tSetorNotif"></span></div>
                     <div><strong>Autor:</strong> <span id="tAutor"></span></div>
-                    <div><strong>Setor Sugerido:</strong> <span id="tSetorSug"></span></div>
+                    <div><strong>Setor Notificado:</strong> <span id="tSetorSug"></span></div>
                     <div>
                         <strong>Evidência:</strong>
                         <a id="tAnexo" href="#" target="_blank"
@@ -308,7 +308,7 @@
             document.getElementById('tDesc').innerText = n.descricao_evento;
             document.getElementById('tSetorNotif').innerText = n.setor_notificador;
             document.getElementById('tAutor').innerText = n.usuario_notificador;
-            document.getElementById('tSetorSug').innerText = n.setor_sugerido;
+            document.getElementById('tSetorSug').innerText = n.setor_notificado_definitivo || n.setor_sugerido;
 
             if (n.produto_descricao) {
                 document.getElementById('blocoProduto').classList.remove('hidden');
