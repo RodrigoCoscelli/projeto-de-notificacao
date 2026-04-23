@@ -84,7 +84,26 @@
             </div>
         </header>
 
-        <div class="mt-16 p-8 space-y-8" id="tablesContainer">
+        <div class="mt-16 p-8 pb-0 flex flex-col md:flex-row gap-4 justify-between items-center z-10 relative">
+            <div class="flex-1 w-full relative">
+                <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-lg">search</span>
+                <input type="text" id="searchInput" placeholder="Buscar por protocolo, descrição ou setor..." 
+                    class="w-full pl-10 pr-4 py-2 bg-white border border-surface-container rounded-lg focus:ring-2 focus:ring-primary focus:outline-none text-sm shadow-sm"
+                    oninput="applyFilters()">
+            </div>
+            <div class="flex gap-4 w-full md:w-auto">
+                <select id="statusFilter" class="bg-white border border-surface-container rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary focus:outline-none text-sm shadow-sm cursor-pointer" onchange="applyFilters()">
+                    <option value="all">Todos os Status</option>
+                </select>
+                <select id="sortOrder" class="bg-white border border-surface-container rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary focus:outline-none text-sm shadow-sm cursor-pointer" onchange="applyFilters()">
+                    <option value="default">Ordenação Padrão</option>
+                    <option value="newest">Mais Recentes</option>
+                    <option value="oldest">Mais Antigos</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="p-8 pt-6 space-y-8" id="tablesContainer">
             <!-- As tabelas serão injetadas via JS -->
             <div class="text-center p-8 text-on-surface-variant">Carregando dados..</div>
         </div>
@@ -92,6 +111,7 @@
 
     <script>
         let currentUser = null;
+        let notificacoesData = [];
 
         async function init() {
             try {
@@ -143,7 +163,71 @@
 
         async function loadNotificacoes() {
             const res = await apiFetch('/api/notificacoes');
-            const data = await res.json();
+            notificacoesData = await res.json();
+            
+            const statusFilter = document.getElementById('statusFilter');
+            const statusSet = new Set(notificacoesData.map(n => n.status).filter(Boolean));
+            
+            statusFilter.innerHTML = '<option value="all">Todos os Status</option>';
+            statusSet.forEach(status => {
+                const option = document.createElement('option');
+                option.value = status;
+                option.textContent = status;
+                statusFilter.appendChild(option);
+            });
+
+            applyFilters();
+        }
+
+        function applyFilters() {
+            const searchQuery = document.getElementById('searchInput').value.toLowerCase();
+            const filterStatus = document.getElementById('statusFilter').value;
+            const sortOrder = document.getElementById('sortOrder').value;
+
+            let filteredData = notificacoesData.filter(n => {
+                if (filterStatus !== 'all' && n.status !== filterStatus) return false;
+                
+                if (searchQuery) {
+                    const desc = (n.descricao_evento || '').toLowerCase();
+                    const prot = (n.protocolo_acompanhamento || '').toLowerCase();
+                    const setorNotif = (n.setor_notificado_definitivo || n.setor_sugerido || '').toLowerCase();
+                    const setorNotificador = (n.setor_notificador || '').toLowerCase();
+
+                    if (!desc.includes(searchQuery) && !prot.includes(searchQuery) && !setorNotif.includes(searchQuery) && !setorNotificador.includes(searchQuery)) {
+                        return false;
+                    }
+                }
+                return true;
+            });
+
+            filteredData.sort((a, b) => {
+                const dateA = new Date(a.data_criacao || a.data_ocorrencia);
+                const dateB = new Date(b.data_criacao || b.data_ocorrencia);
+
+                if (sortOrder === 'default') {
+                    if (currentUser.setor === 'NSP') {
+                        const aTriagem = a.status === 'Aguardando Triagem NSP';
+                        const bTriagem = b.status === 'Aguardando Triagem NSP';
+                        
+                        if (aTriagem && !bTriagem) return -1;
+                        if (!aTriagem && bTriagem) return 1;
+                        
+                        return dateA - dateB;
+                    } else {
+                        return dateB - dateA;
+                    }
+                } else if (sortOrder === 'newest') {
+                    return dateB - dateA;
+                } else if (sortOrder === 'oldest') {
+                    return dateA - dateB;
+                }
+                return 0;
+            });
+
+            renderTables(filteredData);
+        }
+
+        function renderTables(data) {
             const container = document.getElementById('tablesContainer');
             container.innerHTML = '';
 

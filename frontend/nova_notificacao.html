@@ -214,6 +214,28 @@
 
         document.getElementById('notificacaoForm').addEventListener('submit', async (e) => {
             e.preventDefault();
+
+            // Validação adicional da data
+            const inputData = document.getElementById('data_ocorrencia').value;
+            if (inputData) {
+                const [anoStr, mesStr, diaStr] = inputData.split('-');
+                const dataSelecionada = new Date(anoStr, mesStr - 1, diaStr);
+                const hoje = new Date();
+                hoje.setHours(23, 59, 59, 999);
+                const umAnoAtras = new Date();
+                umAnoAtras.setFullYear(hoje.getFullYear() - 1);
+                umAnoAtras.setHours(0, 0, 0, 0);
+
+                if (dataSelecionada > hoje) {
+                    alert("A data da ocorrência não pode ser posterior ao dia de hoje.");
+                    return;
+                }
+                if (dataSelecionada < umAnoAtras) {
+                    alert("A data da ocorrência não pode ser há mais de um ano da data atual.");
+                    return;
+                }
+            }
+
             const fd = new FormData();
             fd.append('data_ocorrencia', document.getElementById('data_ocorrencia').value);
             fd.append('descricao_evento', document.getElementById('descricao_evento').value);
@@ -260,6 +282,24 @@
             }
         }
 
+        function configurarLimitesData() {
+            const dataInput = document.getElementById('data_ocorrencia');
+            const hoje = new Date();
+            
+            // Formatando YYYY-MM-DD considerando o fuso local
+            const offset = hoje.getTimezoneOffset();
+            const dataLocal = new Date(hoje.getTime() - (offset*60*1000));
+            const maxDateStr = dataLocal.toISOString().split('T')[0];
+            
+            const umAnoAtras = new Date(dataLocal);
+            umAnoAtras.setFullYear(umAnoAtras.getFullYear() - 1);
+            const minDateStr = umAnoAtras.toISOString().split('T')[0];
+            
+            dataInput.setAttribute('max', maxDateStr);
+            dataInput.setAttribute('min', minDateStr);
+        }
+
+        configurarLimitesData();
         initAuth();
     </script>
 </body>

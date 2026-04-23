@@ -368,7 +368,6 @@
         }
 
         function abrirModalEncerramento() {
-            if (!validarCamposTriagem()) return;
             document.getElementById('modalEncerramento').classList.remove('hidden');
         }
 
@@ -388,13 +387,13 @@
         }
 
         async function salvarTriagem(encerrarDireto, motivoEncerramento = null) {
-            if (!validarCamposTriagem()) return;
+            if (!encerrarDireto && !validarCamposTriagem()) return;
 
             const payload = {
-                tipo_evento: document.getElementById('tipo_evento').value,
-                setor_notificado_definitivo: document.getElementById('setor_definitivo').value,
-                classificacao_risco: document.getElementById('classificacao_risco').value,
-                classificacao_meta_internacional: document.getElementById('classificacao_meta').value,
+                tipo_evento: document.getElementById('tipo_evento').value || null,
+                setor_notificado_definitivo: document.getElementById('setor_definitivo').value || null,
+                classificacao_risco: document.getElementById('classificacao_risco').value || null,
+                classificacao_meta_internacional: document.getElementById('classificacao_meta').value || null,
                 status: encerrarDireto ? "Encerrada" : "Pendente no Setor"
             };
 

@@ -37,10 +37,10 @@ class NotificacaoCreateAnonima(NotificacaoBase):
     pass
 
 class NotificacaoTriagem(BaseModel):
-    setor_notificado_definitivo: str
-    tipo_evento: str
-    classificacao_risco: str
-    classificacao_meta_internacional: str
+    setor_notificado_definitivo: Optional[str] = None
+    tipo_evento: Optional[str] = None
+    classificacao_risco: Optional[str] = None
+    classificacao_meta_internacional: Optional[str] = None
     motivo_encerramento: Optional[str] = None
     # O NSP pode encerrar diretamente passando status Encerrada
     status: Optional[str] = "Pendente no Setor"
