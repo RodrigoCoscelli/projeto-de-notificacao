@@ -267,6 +267,17 @@
                     document.getElementById('notificacaoForm').classList.add('hidden');
                     document.getElementById('sucesso').classList.remove('hidden');
                     document.getElementById('protocoloGerado').innerText = data.protocolo_acompanhamento;
+                    
+                    if (document.getElementById('anonimo').checked) {
+                        const existingAviso = document.getElementById('aviso-anonimo-msg');
+                        if(!existingAviso) {
+                            const anonAviso = document.createElement('div');
+                            anonAviso.id = 'aviso-anonimo-msg';
+                            anonAviso.className = 'mt-4 mb-4 p-4 bg-yellow-100 border border-yellow-400 text-yellow-800 rounded-lg text-sm text-left';
+                            anonAviso.innerHTML = '<strong>Atenção:</strong> Como você optou por um relato anônimo, esta notificação <strong>não aparecerá</strong> na sua lista padrão. Você precisará deste número de protocolo para rastreá-ela na busca do Painel.';
+                            document.getElementById('sucesso').insertBefore(anonAviso, document.querySelector('#sucesso a'));
+                        }
+                    }
                 } else {
                     alert('Erro ao registrar notificação.');
                 }

@@ -52,6 +52,7 @@ class NotificacaoResposta(BaseModel):
 class NotificacaoPublic(BaseModel):
     protocolo_acompanhamento: str
     status: str
+    justificativa_analise: Optional[str] = None
     tratativa_acao: Optional[str] = None
     data_criacao: datetime
 

@@ -91,7 +91,11 @@
                     class="w-full pl-10 pr-4 py-2 bg-white border border-surface-container rounded-lg focus:ring-2 focus:ring-primary focus:outline-none text-sm shadow-sm"
                     oninput="applyFilters()">
             </div>
-            <div class="flex gap-4 w-full md:w-auto">
+            <div class="flex gap-4 w-full md:w-auto items-center">
+                <button onclick="abrirModalRastreio()" class="flex items-center gap-2 bg-[#00478d] text-white px-4 py-2 rounded-lg text-sm font-bold shadow-sm hover:opacity-90 transition-opacity whitespace-nowrap">
+                    <span class="material-symbols-outlined text-sm">manage_search</span>
+                    Rastrear Protocolo
+                </button>
                 <select id="statusFilter" class="bg-white border border-surface-container rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary focus:outline-none text-sm shadow-sm cursor-pointer" onchange="applyFilters()">
                     <option value="all">Todos os Status</option>
                 </select>
@@ -109,9 +113,108 @@
         </div>
     </main>
 
+    <!-- Modal de Rastreio -->
+    <div id="modalRastreio" class="fixed inset-0 bg-[#001B3D]/50 backdrop-blur-sm z-[60] hidden flex items-center justify-center p-4">
+        <div class="bg-surface-container-lowest w-full max-w-md rounded-2xl shadow-2xl border border-surface-container overflow-hidden">
+            <div class="p-6 border-b border-surface-container flex justify-between items-center bg-surface-container-low">
+                <h3 class="text-lg font-bold brand-font text-on-surface">Rastrear Protocolo</h3>
+                <button onclick="fecharModalRastreio()" class="text-on-surface-variant hover:text-error transition-colors">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+            <div class="p-6 space-y-4">
+                <div>
+                    <label class="block text-sm font-medium mb-1 text-on-surface-variant">Número do Protocolo</label>
+                    <div class="flex gap-2">
+                        <input type="text" id="inputRastreio" class="w-full rounded-lg border-outline-variant px-4 py-2 focus:ring-2 focus:ring-primary focus:outline-none" placeholder="Ex: AMB-XXXXXX">
+                        <button onclick="buscarProtocolo()" class="bg-primary text-white px-4 rounded-lg font-bold hover:opacity-90 transition-opacity">Buscar</button>
+                    </div>
+                </div>
+                
+                <div id="resultadoRastreio" class="hidden mt-4 p-4 rounded-lg border border-surface-container bg-surface-container-low space-y-3">
+                    <div>
+                        <div class="text-[11px] font-bold text-on-surface-variant uppercase tracking-wider">Protocolo</div>
+                        <div class="font-bold text-lg text-primary brand-font" id="r_protocolo"></div>
+                    </div>
+                    <div class="flex justify-between">
+                        <div>
+                            <div class="text-[11px] font-bold text-on-surface-variant uppercase tracking-wider">Data de Criação</div>
+                            <div class="text-sm font-medium" id="r_data"></div>
+                        </div>
+                        <div>
+                            <div class="text-[11px] font-bold text-on-surface-variant uppercase tracking-wider">Status Atual</div>
+                            <div class="text-sm font-bold px-2 py-0.5 rounded bg-surface-variant inline-block mt-0.5" id="r_status"></div>
+                        </div>
+                    </div>
+                    <div id="r_justificativa_container" class="hidden pt-3 border-t border-surface-container">
+                        <div class="text-[11px] font-bold text-on-surface-variant uppercase tracking-wider mb-1">Justificativa / Análise</div>
+                        <div class="text-sm text-on-surface bg-white p-3 rounded border border-outline-variant/30" id="r_justificativa"></div>
+                    </div>
+                    <div id="r_tratativa_container" class="hidden pt-3 border-t border-surface-container">
+                        <div class="text-[11px] font-bold text-on-surface-variant uppercase tracking-wider mb-1">Tratativa / Ação Adotada</div>
+                        <div class="text-sm text-on-surface bg-white p-3 rounded border border-outline-variant/30" id="r_tratativa"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         let currentUser = null;
         let notificacoesData = [];
+
+        function abrirModalRastreio() {
+            document.getElementById('modalRastreio').classList.remove('hidden');
+            document.getElementById('inputRastreio').value = '';
+            document.getElementById('resultadoRastreio').classList.add('hidden');
+        }
+
+        function fecharModalRastreio() {
+            document.getElementById('modalRastreio').classList.add('hidden');
+        }
+
+        async function buscarProtocolo() {
+            const prot = document.getElementById('inputRastreio').value.trim();
+            if(!prot) return;
+            
+            const btn = document.querySelector('#modalRastreio button.bg-primary');
+            const originalText = btn.innerText;
+            btn.innerText = '...';
+            btn.disabled = true;
+
+            try {
+                const res = await fetch(`/api/notificacoes/public/${prot}`);
+                if(res.ok) {
+                    const data = await res.json();
+                    document.getElementById('resultadoRastreio').classList.remove('hidden');
+                    document.getElementById('r_protocolo').innerText = data.protocolo_acompanhamento;
+                    document.getElementById('r_data').innerText = new Date(data.data_criacao).toLocaleDateString('pt-BR');
+                    document.getElementById('r_status').innerText = data.status;
+                    
+                    if(data.justificativa_analise) {
+                        document.getElementById('r_justificativa_container').classList.remove('hidden');
+                        document.getElementById('r_justificativa').innerText = data.justificativa_analise;
+                    } else {
+                        document.getElementById('r_justificativa_container').classList.add('hidden');
+                    }
+                    
+                    if(data.tratativa_acao) {
+                        document.getElementById('r_tratativa_container').classList.remove('hidden');
+                        document.getElementById('r_tratativa').innerText = data.tratativa_acao;
+                    } else {
+                        document.getElementById('r_tratativa_container').classList.add('hidden');
+                    }
+                } else {
+                    alert('Protocolo não encontrado ou inválido.');
+                    document.getElementById('resultadoRastreio').classList.add('hidden');
+                }
+            } catch(e) {
+                alert('Erro de conexão ao buscar protocolo.');
+            } finally {
+                btn.innerText = originalText;
+                btn.disabled = false;
+            }
+        }
 
         async function init() {
             try {
