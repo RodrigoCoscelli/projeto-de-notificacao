@@ -9,14 +9,14 @@ router = APIRouter(prefix="/api/users", tags=["users"])
 
 @router.get("", response_model=List[schemas.Usuario])
 def list_users(current_user: models.Usuario = Depends(get_current_user), db: Session = Depends(database.get_db)):
-    if current_user.username != "admin_nsp":
-        raise HTTPException(status_code=403, detail="Acesso negado. Apenas o admin_nsp pode listar usuários.")
+    if current_user.setor != "NSP":
+        raise HTTPException(status_code=403, detail="Acesso negado. Apenas usuários do NSP podem listar usuários.")
     return db.query(models.Usuario).all()
 
 @router.post("", response_model=schemas.Usuario)
 def create_user(user: schemas.UsuarioCreate, current_user: models.Usuario = Depends(get_current_user), db: Session = Depends(database.get_db)):
-    if current_user.username != "admin_nsp":
-        raise HTTPException(status_code=403, detail="Acesso negado. Apenas o admin_nsp pode criar usuários.")
+    if current_user.setor != "NSP":
+        raise HTTPException(status_code=403, detail="Acesso negado. Apenas usuários do NSP podem criar usuários.")
     
     existing_user = db.query(models.Usuario).filter(models.Usuario.username == user.username).first()
     if existing_user:
@@ -31,8 +31,8 @@ def create_user(user: schemas.UsuarioCreate, current_user: models.Usuario = Depe
 
 @router.delete("/{user_id}")
 def delete_user(user_id: int, current_user: models.Usuario = Depends(get_current_user), db: Session = Depends(database.get_db)):
-    if current_user.username != "admin_nsp":
-        raise HTTPException(status_code=403, detail="Acesso negado. Apenas o admin_nsp pode excluir usuários.")
+    if current_user.setor != "NSP":
+        raise HTTPException(status_code=403, detail="Acesso negado. Apenas usuários do NSP podem excluir usuários.")
     
     user_to_delete = db.query(models.Usuario).filter(models.Usuario.id == user_id).first()
     if not user_to_delete:

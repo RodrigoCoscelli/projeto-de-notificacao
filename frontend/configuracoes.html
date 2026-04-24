@@ -129,7 +129,7 @@
                 <div class="p-6 border-b border-surface-container bg-surface-container-low/50">
                     <h2 class="text-lg font-bold text-error brand-font flex items-center">
                         <span class="material-symbols-outlined mr-2">manage_accounts</span>
-                        Gerenciamento de Usuários (Apenas Admin NSP)
+                        Gerenciamento de Usuários (Apenas NSP)
                     </h2>
                     <p class="text-sm text-on-surface-variant mt-1">Crie ou remova acessos ao sistema.</p>
                 </div>
@@ -215,7 +215,7 @@
                 document.getElementById('userRoleHeader').innerText = currentUser.setor;
                 document.getElementById('pageBody').classList.remove('hidden');
 
-                if (currentUser.username === 'admin_nsp') {
+                if (currentUser.setor === 'NSP') {
                     document.getElementById('adminPanel').classList.remove('hidden');
                     loadUsers();
                 }
