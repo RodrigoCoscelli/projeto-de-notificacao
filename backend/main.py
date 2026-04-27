@@ -5,7 +5,7 @@ from fastapi.staticfiles import StaticFiles
 from . import models, database
 from .routers import auth, notificacoes, reports, users
 
-app = FastAPI(title="Notifica AME PG API")
+app = FastAPI(title="Notifica Ambulatório API")
 
 # Criar tabelas se não existirem (forma simples sem alembic estrito para esta POC)
 models.Base.metadata.create_all(bind=database.engine)

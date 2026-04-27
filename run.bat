@@ -1,6 +1,6 @@
 @echo off
 echo ==========================================
-echo    Iniciando o Notifica AME PG (Backend)
+echo    Iniciando o Notifica Ambulatório (Backend)
 echo ==========================================
 echo.
 
@@ -31,6 +31,6 @@ if errorlevel 1 (
 )
 
 echo Iniciando o Uvicorn...
-venv\Scripts\uvicorn.exe backend.main:app --reload
+venv\Scripts\uvicorn.exe backend.main:app --reload --host 0.0.0.0
 
 pause

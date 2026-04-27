@@ -1,4 +1,4 @@
-# Como Rodar o Projeto: Notifica AME PG
+# Como Rodar o Projeto: Notifica Ambulatório
 
 Este projeto é composto por um backend construído em **FastAPI** (Python) e um frontend em **HTML/CSS/JavaScript puro** que é servido estaticamente pelo próprio backend.
 

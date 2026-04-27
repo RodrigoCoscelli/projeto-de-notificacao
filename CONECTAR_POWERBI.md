@@ -1,6 +1,6 @@
-# Conectando o Notifica AME PG ao Power BI
+# Conectando o Notifica Ambulatório ao Power BI
 
-Este guia explica passo a passo como conectar a API de relatórios do sistema **Notifica AME PG** ao **Microsoft Power BI Desktop** para criar dashboards e relatórios interativos.
+Este guia explica passo a passo como conectar a API de relatórios do sistema **Notifica Ambulatório** ao **Microsoft Power BI Desktop** para criar dashboards e relatórios interativos.
 
 ---
 
@@ -44,7 +44,7 @@ Este guia explica passo a passo como conectar a API de relatórios do sistema **
 ## Passo a Passo: Conectando no Power BI Desktop
 
 ### Pré-requisito
-O servidor do Notifica AME PG precisa estar **rodando** para que o Power BI consiga acessar a API. Certifique-se de que o servidor esteja ativo executando:
+O servidor do Notifica Ambulatório precisa estar **rodando** para que o Power BI consiga acessar a API. Certifique-se de que o servidor esteja ativo executando:
 ```bash
 uvicorn backend.main:app --reload
 ```

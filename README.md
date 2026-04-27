@@ -6,11 +6,11 @@
   <img src="https://img.shields.io/badge/Power_BI-F2C811?style=for-the-badge&logo=powerbi&logoColor=black" />
 </p>
 
-# 🏥 Notifica AME PG
+# 🏥 Notifica Ambulatório
 
-**Sistema de Gestão de Notificações de Eventos Adversos** para o **AME Praia Grande**, focado em **Qualidade e Segurança do Paciente**.
+**Sistema de Gestão de Notificações de Eventos Adversos** para o **Ambulatório**, focado em **Qualidade e Segurança do Paciente**.
 
-O Notifica AME PG permite que qualquer colaborador registre notificações de eventos adversos, incidentes e quase-erros (*near miss*) de forma simples — inclusive de **forma anônima** — promovendo a cultura de segurança e a melhoria contínua dos processos assistenciais.
+O Notifica Ambulatório permite que qualquer colaborador registre notificações de eventos adversos, incidentes e quase-erros (*near miss*) de forma simples — inclusive de **forma anônima** — promovendo a cultura de segurança e a melhoria contínua dos processos assistenciais.
 
 ---
 
@@ -26,7 +26,7 @@ O Notifica AME PG permite que qualquer colaborador registre notificações de ev
 
 ## 🎯 Visão Geral
 
-O **Notifica AME PG** é um sistema web criado com o auxílio da I.A para gerenciamento do ciclo de vida de notificações de eventos adversos no ambiente de ambulatório. Ele contempla:
+O **Notifica Ambulatório** é um sistema web criado com o auxílio da I.A para gerenciamento do ciclo de vida de notificações de eventos adversos no ambiente de ambulatório. Ele contempla:
 
 | Etapa | Descrição |
 |-------|-----------|
@@ -166,5 +166,5 @@ Funcionalidades planejadas para versões futuras:
 ---
 
 <p align="center">
-  <sub>Desenvolvido para o <strong>AME Praia Grande</strong> — Qualidade e Segurança do Paciente</sub>
+  <sub>Desenvolvido para o <strong>Ambulatório</strong> — Qualidade e Segurança do Paciente</sub>
 </p>
