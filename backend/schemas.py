@@ -21,6 +21,9 @@ class UsuarioUpdate(BaseModel):
     email: Optional[str] = None
     password: Optional[str] = None
 
+class UsuarioAdminUpdate(BaseModel):
+    setor: Optional[str] = None
+
 
 class NotificacaoBase(BaseModel):
     data_ocorrencia: date

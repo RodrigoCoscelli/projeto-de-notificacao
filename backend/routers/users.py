@@ -42,6 +42,22 @@ def delete_user(user_id: int, current_user: models.Usuario = Depends(get_current
     db.commit()
     return {"detail": "Usuário excluído com sucesso."}
 
+@router.put("/{user_id}", response_model=schemas.Usuario)
+def update_user_admin(user_id: int, user_update: schemas.UsuarioAdminUpdate, current_user: models.Usuario = Depends(get_current_user), db: Session = Depends(database.get_db)):
+    if current_user.setor != "NSP":
+        raise HTTPException(status_code=403, detail="Acesso negado. Apenas usuários do NSP podem alterar outros usuários.")
+    
+    target_user = db.query(models.Usuario).filter(models.Usuario.id == user_id).first()
+    if not target_user:
+        raise HTTPException(status_code=404, detail="Usuário não encontrado.")
+    
+    if user_update.setor:
+        target_user.setor = user_update.setor
+    
+    db.commit()
+    db.refresh(target_user)
+    return target_user
+
 @router.put("/me", response_model=schemas.Usuario)
 def update_me(user_update: schemas.UsuarioUpdate, current_user: models.Usuario = Depends(get_current_user), db: Session = Depends(database.get_db)):
     if user_update.username:
