@@ -97,8 +97,8 @@
 
                 <div class="grid grid-cols-2 gap-6 mb-8 text-sm">
                     <div><strong>Data da Ocorrência:</strong> <span id="tData"></span></div>
-                    <div><strong>Status:</strong> <span id="tStatus"
-                            class="bg-surface-variant px-2 py-1 rounded"></span></div>
+                    <div><strong>Status:</strong> <span id="tStatus" class="px-2 py-1 rounded text-xs font-bold"></span>
+                    </div>
                     <div class="col-span-2">
                         <strong>Descrição do Evento:</strong>
                         <p class="mt-2 p-4 bg-surface-container-low rounded border border-outline-variant/30"
@@ -187,6 +187,12 @@
                                 </option>
                             </select>
                         </div>
+                        <div class="col-span-2 mt-2 flex items-center">
+                            <input type="checkbox" id="requer_plano_acao"
+                                class="rounded border-outline-variant text-primary w-4 h-4 mr-2">
+                            <label for="requer_plano_acao" class="text-sm font-medium">Requer Plano de Ação 5W2H (Setor
+                                notificado deverá preencher)</label>
+                        </div>
                         <div class="col-span-2 pt-2 flex items-center space-x-4">
                             <button type="button" onclick="salvarTriagem(false)"
                                 class="bg-primary text-white px-6 py-2 rounded font-bold hover:opacity-90">Enviar para
@@ -224,10 +230,86 @@
                             <textarea id="tratativa" rows="3" class="w-full rounded border-outline-variant"
                                 required></textarea>
                         </div>
+
+                        <!-- Campos 5W2H -->
+                        <div id="bloco5W2H" class="hidden space-y-4 pt-4 border-t border-outline-variant/30">
+                            <h4 class="text-lg font-bold text-secondary brand-font">Preencher Plano de Ação 5W2H</h4>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div class="col-span-2">
+                                    <label class="block text-sm font-medium mb-1">O que (What) será feito?</label>
+                                    <input type="text" id="pa_o_que" class="w-full rounded border-outline-variant"
+                                        placeholder="Ação a ser realizada">
+                                </div>
+                                <div class="col-span-2">
+                                    <label class="block text-sm font-medium mb-1">Por que (Why) será feito?</label>
+                                    <input type="text" id="pa_por_que" class="w-full rounded border-outline-variant"
+                                        placeholder="Justificativa da ação">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium mb-1">Onde (Where) será feito?</label>
+                                    <input type="text" id="pa_onde" class="w-full rounded border-outline-variant"
+                                        placeholder="Local">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium mb-1">Quando (When) será feito?</label>
+                                    <input type="date" id="pa_quando" class="w-full rounded border-outline-variant"
+                                        placeholder="Prazo/Data">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium mb-1">Quem (Who) fará?</label>
+                                    <input type="text" id="pa_quem" class="w-full rounded border-outline-variant"
+                                        placeholder="Responsável">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium mb-1">Como (How) será feito?</label>
+                                    <input type="text" id="pa_como" class="w-full rounded border-outline-variant"
+                                        placeholder="Método/Processo">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium mb-1">Quanto custa (How much)?</label>
+                                    <input type="text" id="pa_quanto_custa"
+                                        class="w-full rounded border-outline-variant"
+                                        placeholder="Custo estimado ou 'N/A'">
+                                </div>
+                            </div>
+                        </div>
+
                         <button type="submit"
                             class="bg-secondary text-white px-6 py-2 rounded font-bold hover:opacity-90">Salvar
-                            Tratativa (Encerrar)</button>
+                            Tratativa</button>
                     </form>
+                </div>
+
+                <!-- Bloco Avaliação NSP (Plano de Ação) -->
+                <div id="blocoAvaliacaoNSP" class="hidden space-y-6">
+                    <h3 class="text-xl font-bold text-primary brand-font border-l-4 border-primary pl-3">Ação: Avaliação
+                        de Plano de Ação 5W2H (NSP)</h3>
+
+                    <div
+                        class="bg-surface-container-low p-4 rounded text-sm mb-6 border border-outline-variant/30 space-y-2">
+                        <p><strong>Justificativa do Setor:</strong> <span id="av_justificativa"></span></p>
+                        <p><strong>Tratativa:</strong> <span id="av_tratativa"></span></p>
+                        <hr class="my-4 border-outline-variant/30">
+                        <h4 class="font-bold text-secondary mb-2">Plano de Ação 5W2H Submetido:</h4>
+                        <div class="grid grid-cols-2 gap-y-2 gap-x-4">
+                            <div><strong>O que:</strong> <span id="av_o_que"></span></div>
+                            <div><strong>Por que:</strong> <span id="av_por_que"></span></div>
+                            <div><strong>Onde:</strong> <span id="av_onde"></span></div>
+                            <div><strong>Quando:</strong> <span id="av_quando"></span></div>
+                            <div><strong>Quem:</strong> <span id="av_quem"></span></div>
+                            <div><strong>Como:</strong> <span id="av_como"></span></div>
+                            <div><strong>Quanto Custa:</strong> <span id="av_quanto_custa"></span></div>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center space-x-4">
+                        <button type="button" onclick="avaliarPlano('Aprovado')"
+                            class="bg-primary text-white px-6 py-2 rounded font-bold hover:opacity-90">Aprovar Plano
+                            (Concluir)</button>
+                        <button type="button" onclick="avaliarPlano('Recusado')"
+                            class="bg-error text-white px-6 py-2 rounded font-bold hover:opacity-90">Recusar
+                            Plano</button>
+                    </div>
                 </div>
 
                 <!-- Bloco Notificação Resolvida -->
@@ -244,6 +326,19 @@
                                 class="text-on-surface-variant block mt-1"></span></p>
                         <p><strong>Tratativa:</strong> <br><span id="fTrat"
                                 class="text-on-surface-variant block mt-1"></span></p>
+
+                        <div id="fBlocoPlanoAcao" class="hidden mt-4 pt-4 border-t border-outline-variant/30">
+                            <h4 class="font-bold text-secondary mb-2">Plano de Ação 5W2H Aprovado:</h4>
+                            <div class="grid grid-cols-2 gap-y-2 gap-x-4 text-sm">
+                                <div><strong>O que:</strong> <span id="f_pa_o_que"></span></div>
+                                <div><strong>Por que:</strong> <span id="f_pa_por_que"></span></div>
+                                <div><strong>Onde:</strong> <span id="f_pa_onde"></span></div>
+                                <div><strong>Quando:</strong> <span id="f_pa_quando"></span></div>
+                                <div><strong>Quem:</strong> <span id="f_pa_quem"></span></div>
+                                <div><strong>Como:</strong> <span id="f_pa_como"></span></div>
+                                <div><strong>Quanto Custa:</strong> <span id="f_pa_quanto_custa"></span></div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -304,7 +399,11 @@
 
             document.getElementById('tProto').innerText = "Protocolo " + n.protocolo_acompanhamento;
             document.getElementById('tData').innerText = new Date(n.data_ocorrencia).toLocaleDateString('pt-BR') || n.data_ocorrencia;
-            document.getElementById('tStatus').innerText = n.status;
+
+            const tStatusEl = document.getElementById('tStatus');
+            tStatusEl.innerText = n.status;
+            tStatusEl.className = `px-2 py-1 rounded text-xs font-bold ${getStatusColorClass(n.status)}`;
+
             document.getElementById('tDesc').innerText = n.descricao_evento;
             document.getElementById('tSetorNotif').innerText = n.setor_notificador;
             document.getElementById('tAutor').innerText = n.usuario_notificador;
@@ -339,10 +438,53 @@
                 document.getElementById('rClassRisco').innerText = n.classificacao_risco || '-';
                 document.getElementById('rMeta').innerText = n.classificacao_meta_internacional || '-';
                 document.getElementById('rResp').innerText = n.setor_notificado_definitivo;
+                if (n.requer_plano_acao) {
+                    document.getElementById('rResp').innerText += " (Requer Plano de Ação 5W2H)";
+                }
             }
 
-            if (n.status === "Pendente no Setor" && n.setor_notificado_definitivo === currentUser.setor) {
+            if ((n.status === "Pendente no Setor" || n.status === "Aguardando Plano de Ação 5W2H" || n.status === "Plano de Ação Recusado") && n.setor_notificado_definitivo === currentUser.setor) {
                 document.getElementById('blocoResposta').classList.remove('hidden');
+
+                if (n.requer_plano_acao) {
+                    document.getElementById('bloco5W2H').classList.remove('hidden');
+                    // Preencher required nos campos
+                    const campos5W2H = ['pa_o_que', 'pa_por_que', 'pa_onde', 'pa_quando', 'pa_quem', 'pa_como', 'pa_quanto_custa'];
+                    campos5W2H.forEach(c => document.getElementById(c).required = true);
+
+                    // Pre-fill se for recusa
+                    if (n.plano_acao) {
+                        document.getElementById('pa_o_que').value = n.plano_acao.o_que;
+                        document.getElementById('pa_por_que').value = n.plano_acao.por_que;
+                        document.getElementById('pa_onde').value = n.plano_acao.onde;
+                        document.getElementById('pa_quando').value = n.plano_acao.quando;
+                        document.getElementById('pa_quem').value = n.plano_acao.quem;
+                        document.getElementById('pa_como').value = n.plano_acao.como;
+                        document.getElementById('pa_quanto_custa').value = n.plano_acao.quanto_custa;
+                        document.getElementById('justificativa').value = n.justificativa_analise || "";
+                        document.getElementById('tratativa').value = n.tratativa_acao || "";
+                    }
+
+                    // Impedir data anterior ao dia atual no campo "Quando"
+                    const today = new Date().toISOString().split('T')[0];
+                    document.getElementById('pa_quando').setAttribute('min', today);
+                }
+            }
+
+            if (n.status === "Plano em Análise NSP" && currentUser.setor === "NSP") {
+                document.getElementById('blocoAvaliacaoNSP').classList.remove('hidden');
+                document.getElementById('av_justificativa').innerText = n.justificativa_analise || "-";
+                document.getElementById('av_tratativa').innerText = n.tratativa_acao || "-";
+
+                if (n.plano_acao) {
+                    document.getElementById('av_o_que').innerText = n.plano_acao.o_que;
+                    document.getElementById('av_por_que').innerText = n.plano_acao.por_que;
+                    document.getElementById('av_onde').innerText = n.plano_acao.onde;
+                    document.getElementById('av_quando').innerText = n.plano_acao.quando;
+                    document.getElementById('av_quem').innerText = n.plano_acao.quem;
+                    document.getElementById('av_como').innerText = n.plano_acao.como;
+                    document.getElementById('av_quanto_custa').innerText = n.plano_acao.quanto_custa;
+                }
             }
 
             if (n.status === "Respondida" || n.status === "Encerrada") {
@@ -353,6 +495,17 @@
                 }
                 document.getElementById('fJust').innerText = n.justificativa_analise || "Sem justificativa";
                 document.getElementById('fTrat').innerText = n.tratativa_acao || "Encerrada via NSP.";
+
+                if (n.plano_acao && n.plano_acao.status === "Aprovado") {
+                    document.getElementById('fBlocoPlanoAcao').classList.remove('hidden');
+                    document.getElementById('f_pa_o_que').innerText = n.plano_acao.o_que;
+                    document.getElementById('f_pa_por_que').innerText = n.plano_acao.por_que;
+                    document.getElementById('f_pa_onde').innerText = n.plano_acao.onde;
+                    document.getElementById('f_pa_quando').innerText = n.plano_acao.quando;
+                    document.getElementById('f_pa_quem').innerText = n.plano_acao.quem;
+                    document.getElementById('f_pa_como').innerText = n.plano_acao.como;
+                    document.getElementById('f_pa_quanto_custa').innerText = n.plano_acao.quanto_custa;
+                }
             }
         }
 
@@ -394,6 +547,7 @@
                 setor_notificado_definitivo: document.getElementById('setor_definitivo').value || null,
                 classificacao_risco: document.getElementById('classificacao_risco').value || null,
                 classificacao_meta_internacional: document.getElementById('classificacao_meta').value || null,
+                requer_plano_acao: document.getElementById('requer_plano_acao').checked,
                 status: encerrarDireto ? "Encerrada" : "Pendente no Setor"
             };
 
@@ -421,6 +575,27 @@
                 justificativa_analise: document.getElementById('justificativa').value,
                 tratativa_acao: document.getElementById('tratativa').value
             };
+
+            const bloco5W2H = document.getElementById('bloco5W2H');
+            if (!bloco5W2H.classList.contains('hidden')) {
+                const quandoValue = document.getElementById('pa_quando').value;
+                const today = new Date().toISOString().split('T')[0];
+                if (quandoValue < today) {
+                    alert("A data em 'Quando' não pode ser anterior ao dia de hoje.");
+                    return;
+                }
+
+                payload.plano_acao = {
+                    o_que: document.getElementById('pa_o_que').value,
+                    por_que: document.getElementById('pa_por_que').value,
+                    onde: document.getElementById('pa_onde').value,
+                    quando: document.getElementById('pa_quando').value,
+                    quem: document.getElementById('pa_quem').value,
+                    como: document.getElementById('pa_como').value,
+                    quanto_custa: document.getElementById('pa_quanto_custa').value
+                };
+            }
+
             const res = await apiFetch(`/api/notificacoes/${notifId}/resposta`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
@@ -428,12 +603,26 @@
             });
 
             if (res.ok) {
-                alert("Tratativa salva! Notificação encerrada.");
+                alert("Tratativa/Plano salvo com sucesso!");
                 window.location.reload();
             } else {
                 alert("Erro ao salvar tratativa.");
             }
         });
+
+        async function avaliarPlano(statusAnalise) {
+            const res = await apiFetch(`/api/notificacoes/${notifId}/plano_acao/analise`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ status: statusAnalise })
+            });
+            if (res.ok) {
+                alert(`Plano de ação ${statusAnalise}!`);
+                window.location.reload();
+            } else {
+                alert("Erro ao avaliar plano.");
+            }
+        }
 
         init();
     </script>

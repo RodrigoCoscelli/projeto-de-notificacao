@@ -143,7 +143,7 @@
                         </div>
                         <div>
                             <div class="text-[11px] font-bold text-on-surface-variant uppercase tracking-wider">Status Atual</div>
-                            <div class="text-sm font-bold px-2 py-0.5 rounded bg-surface-variant inline-block mt-0.5" id="r_status"></div>
+                            <div class="text-xs font-bold px-2 py-1 rounded inline-block mt-0.5" id="r_status"></div>
                         </div>
                     </div>
                     <div id="r_justificativa_container" class="hidden pt-3 border-t border-surface-container">
@@ -153,6 +153,18 @@
                     <div id="r_tratativa_container" class="hidden pt-3 border-t border-surface-container">
                         <div class="text-[11px] font-bold text-on-surface-variant uppercase tracking-wider mb-1">Tratativa / Ação Adotada</div>
                         <div class="text-sm text-on-surface bg-white p-3 rounded border border-outline-variant/30" id="r_tratativa"></div>
+                    </div>
+                    <div id="r_plano_acao_container" class="hidden pt-3 border-t border-surface-container">
+                        <div class="text-[11px] font-bold text-on-surface-variant uppercase tracking-wider mb-1">Plano de Ação 5W2H</div>
+                        <div class="text-sm text-on-surface bg-white p-3 rounded border border-outline-variant/30 grid grid-cols-2 gap-x-2 gap-y-1">
+                            <div><strong>O que:</strong> <span id="r_pa_o_que"></span></div>
+                            <div><strong>Por que:</strong> <span id="r_pa_por_que"></span></div>
+                            <div><strong>Onde:</strong> <span id="r_pa_onde"></span></div>
+                            <div><strong>Quando:</strong> <span id="r_pa_quando"></span></div>
+                            <div><strong>Quem:</strong> <span id="r_pa_quem"></span></div>
+                            <div><strong>Como:</strong> <span id="r_pa_como"></span></div>
+                            <div class="col-span-2"><strong>Quanto Custa:</strong> <span id="r_pa_quanto_custa"></span></div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -189,7 +201,10 @@
                     document.getElementById('resultadoRastreio').classList.remove('hidden');
                     document.getElementById('r_protocolo').innerText = data.protocolo_acompanhamento;
                     document.getElementById('r_data').innerText = new Date(data.data_criacao).toLocaleDateString('pt-BR');
-                    document.getElementById('r_status').innerText = data.status;
+                    
+                    const rStatusEl = document.getElementById('r_status');
+                    rStatusEl.innerText = data.status;
+                    rStatusEl.className = `text-xs font-bold px-2 py-1 rounded inline-block mt-0.5 ${getStatusColorClass(data.status)}`;
                     
                     if(data.justificativa_analise) {
                         document.getElementById('r_justificativa_container').classList.remove('hidden');
@@ -203,6 +218,19 @@
                         document.getElementById('r_tratativa').innerText = data.tratativa_acao;
                     } else {
                         document.getElementById('r_tratativa_container').classList.add('hidden');
+                    }
+
+                    if(data.plano_acao && data.plano_acao.status === "Aprovado") {
+                        document.getElementById('r_plano_acao_container').classList.remove('hidden');
+                        document.getElementById('r_pa_o_que').innerText = data.plano_acao.o_que;
+                        document.getElementById('r_pa_por_que').innerText = data.plano_acao.por_que;
+                        document.getElementById('r_pa_onde').innerText = data.plano_acao.onde;
+                        document.getElementById('r_pa_quando').innerText = data.plano_acao.quando;
+                        document.getElementById('r_pa_quem').innerText = data.plano_acao.quem;
+                        document.getElementById('r_pa_como').innerText = data.plano_acao.como;
+                        document.getElementById('r_pa_quanto_custa').innerText = data.plano_acao.quanto_custa;
+                    } else {
+                        document.getElementById('r_plano_acao_container').classList.add('hidden');
                     }
                 } else {
                     alert('Protocolo não encontrado ou inválido.');
@@ -335,8 +363,18 @@
             container.innerHTML = '';
 
             if (currentUser.setor === "NSP") {
-                container.innerHTML = createTableHTML('listNSP', 'Fila de Triagem - NSP', 'Notificações aguardando classificação e direcionamento ou acompanhamento.');
-                populateTable('listNSP', data);
+                container.innerHTML = 
+                    createTableHTML('listTriagemNSP', 'Fila de Triagem - NSP', 'Notificações aguardando classificação e direcionamento.') +
+                    createTableHTML('listPlanosNSP', 'Planos de Ação em Análise', 'Planos de ação 5W2H preenchidos pelos setores aguardando aprovação.') +
+                    createTableHTML('listAcompanhamentoNSP', 'Acompanhamento Geral', 'Todas as outras notificações.');
+
+                const triagem = data.filter(n => n.status === "Aguardando Triagem NSP");
+                const planos = data.filter(n => n.status === "Plano em Análise NSP");
+                const outros = data.filter(n => n.status !== "Aguardando Triagem NSP" && n.status !== "Plano em Análise NSP");
+
+                populateTable('listTriagemNSP', triagem);
+                populateTable('listPlanosNSP', planos);
+                populateTable('listAcompanhamentoNSP', outros);
             } else {
                 container.innerHTML =
                     createTableHTML('listRecebidas', 'Ocorrências Recebidas', 'Notificações direcionadas ao seu setor pelo NSP para tratativa.') +
@@ -375,7 +413,7 @@
                     <td class="px-8 py-4 whitespace-nowrap text-sm font-semibold">${n.setor_notificado_definitivo || n.setor_sugerido}</td>
                     
                     <td class="px-8 py-4 whitespace-nowrap">
-                        <span class="text-[10px] font-bold px-2 py-1 rounded bg-surface-variant">${n.status}</span>
+                        <span class="text-[10px] font-bold px-2 py-1 rounded ${getStatusColorClass(n.status)}">${n.status}</span>
                     </td>
                     <td class="px-8 py-4">
                         <button class="p-2 text-primary hover:bg-primary-fixed rounded-full transition-colors">

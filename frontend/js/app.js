@@ -98,3 +98,31 @@ function decodeToken(token) {
         return null;
     }
 }
+
+function getStatusColorClass(status) {
+    if (!status) return 'bg-surface-variant text-on-surface';
+    
+    const s = status.toLowerCase();
+    
+    // Verde (Sucesso / Concluído)
+    if (s.includes('encerrada') || s.includes('concluíd') || s.includes('aprovado') || s.includes('respondida')) {
+        return 'bg-green-100 text-green-800 border border-green-200';
+    }
+    
+    // Vermelho (Recusado / Erro)
+    if (s.includes('recusado') || s.includes('cancelado')) {
+        return 'bg-red-100 text-red-800 border border-red-200';
+    }
+    
+    // Azul / Laranja / Amarelo (Em andamento / Aguardando)
+    if (s.includes('aguardando triagem') || s.includes('pendente')) {
+        return 'bg-yellow-100 text-yellow-800 border border-yellow-200';
+    }
+    
+    if (s.includes('análise nsp') || s.includes('plano de ação 5w2h')) {
+        return 'bg-blue-100 text-blue-800 border border-blue-200';
+    }
+    
+    // Default
+    return 'bg-surface-variant text-on-surface border border-outline-variant/30';
+}

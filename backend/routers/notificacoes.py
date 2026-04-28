@@ -103,7 +103,7 @@ def listar_notificacoes(db: Session = Depends(database.get_db), current_user: mo
             or_(
                 and_(
                     models.Notificacao.setor_notificado_definitivo == current_user.setor,
-                    models.Notificacao.status.in_(["Pendente no Setor", "Respondida"])
+                    models.Notificacao.status.in_(["Pendente no Setor", "Aguardando Plano de Ação 5W2H", "Plano de Ação Recusado", "Respondida", "Plano em Análise NSP"])
                 ),
                 models.Notificacao.setor_notificador == current_user.setor
             )
@@ -134,7 +134,12 @@ def triagem_nsp(id: int, triagem: schemas.NotificacaoTriagem, db: Session = Depe
     if triagem.motivo_encerramento:
         notificacao.motivo_encerramento = triagem.motivo_encerramento
     
-    notificacao.status = triagem.status
+    notificacao.requer_plano_acao = triagem.requer_plano_acao
+    if triagem.requer_plano_acao and triagem.status != "Encerrada":
+        notificacao.status = "Aguardando Plano de Ação 5W2H"
+    else:
+        notificacao.status = triagem.status
+        
     notificacao.data_triagem_nsp = datetime.now()
     
     db.commit()
@@ -152,8 +157,60 @@ def resposta_setor(id: int, resposta: schemas.NotificacaoResposta, db: Session =
 
     notificacao.justificativa_analise = resposta.justificativa_analise
     notificacao.tratativa_acao = resposta.tratativa_acao
-    notificacao.status = "Respondida"
     notificacao.data_resposta_setor = datetime.now()
+
+    if notificacao.requer_plano_acao and resposta.plano_acao:
+        if notificacao.plano_acao:
+            # Update existing
+            notificacao.plano_acao.o_que = resposta.plano_acao.o_que
+            notificacao.plano_acao.por_que = resposta.plano_acao.por_que
+            notificacao.plano_acao.onde = resposta.plano_acao.onde
+            notificacao.plano_acao.quando = resposta.plano_acao.quando
+            notificacao.plano_acao.quem = resposta.plano_acao.quem
+            notificacao.plano_acao.como = resposta.plano_acao.como
+            notificacao.plano_acao.quanto_custa = resposta.plano_acao.quanto_custa
+            notificacao.plano_acao.status = "Aguardando Análise NSP"
+        else:
+            # Create new
+            novo_plano = models.PlanoAcao(
+                o_que=resposta.plano_acao.o_que,
+                por_que=resposta.plano_acao.por_que,
+                onde=resposta.plano_acao.onde,
+                quando=resposta.plano_acao.quando,
+                quem=resposta.plano_acao.quem,
+                como=resposta.plano_acao.como,
+                quanto_custa=resposta.plano_acao.quanto_custa,
+                status="Aguardando Análise NSP"
+            )
+            db.add(novo_plano)
+            db.flush()
+            notificacao.id_plano_acao = novo_plano.id
+            
+        notificacao.status = "Plano em Análise NSP"
+    else:
+        notificacao.status = "Respondida"
+    
+    db.commit()
+    db.refresh(notificacao)
+    return notificacao
+
+class PlanoAcaoAnaliseSchema(schemas.BaseModel):
+    status: str # "Aprovado" ou "Recusado"
+
+@router.put("/{id}/plano_acao/analise", response_model=schemas.Notificacao)
+def analise_plano_acao(id: int, analise: PlanoAcaoAnaliseSchema, db: Session = Depends(database.get_db), current_user: models.Usuario = Depends(get_current_user)):
+    if current_user.setor != "NSP":
+        raise HTTPException(status_code=403, detail="Apenas NSP pode analisar planos de ação")
+    
+    notificacao = db.query(models.Notificacao).filter(models.Notificacao.id == id).first()
+    if not notificacao or not notificacao.plano_acao:
+        raise HTTPException(status_code=404, detail="Plano de ação não encontrado")
+
+    notificacao.plano_acao.status = analise.status
+    if analise.status == "Aprovado":
+        notificacao.status = "Encerrada"
+    elif analise.status == "Recusado":
+        notificacao.status = "Plano de Ação Recusado"
     
     db.commit()
     db.refresh(notificacao)

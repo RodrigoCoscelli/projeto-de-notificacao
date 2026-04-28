@@ -2,6 +2,25 @@ from pydantic import BaseModel
 from typing import Optional
 from datetime import date, datetime
 
+class PlanoAcaoBase(BaseModel):
+    o_que: str
+    por_que: str
+    onde: str
+    quando: str
+    quem: str
+    como: str
+    quanto_custa: str
+
+class PlanoAcao(PlanoAcaoBase):
+    id: int
+    status: str
+    data_criacao: datetime
+    data_atualizacao: Optional[datetime] = None
+
+    class Config:
+        orm_mode = True
+        from_attributes = True
+
 class UsuarioBase(BaseModel):
     username: str
     email: Optional[str] = None
@@ -49,10 +68,12 @@ class NotificacaoTriagem(BaseModel):
     motivo_encerramento: Optional[str] = None
     # O NSP pode encerrar diretamente passando status Encerrada
     status: Optional[str] = "Pendente no Setor"
+    requer_plano_acao: Optional[bool] = False
 
 class NotificacaoResposta(BaseModel):
     justificativa_analise: str
     tratativa_acao: str
+    plano_acao: Optional[PlanoAcaoBase] = None
 
 class NotificacaoPublic(BaseModel):
     protocolo_acompanhamento: str
@@ -60,6 +81,7 @@ class NotificacaoPublic(BaseModel):
     justificativa_analise: Optional[str] = None
     tratativa_acao: Optional[str] = None
     data_criacao: datetime
+    plano_acao: Optional[PlanoAcao] = None
 
 class Notificacao(NotificacaoBase):
     id: int
@@ -84,6 +106,8 @@ class Notificacao(NotificacaoBase):
     data_criacao: datetime
     data_triagem_nsp: Optional[datetime] = None
     data_resposta_setor: Optional[datetime] = None
+    requer_plano_acao: bool
+    plano_acao: Optional[PlanoAcao] = None
 
     class Config:
         orm_mode = True

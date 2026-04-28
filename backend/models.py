@@ -1,6 +1,21 @@
-from sqlalchemy import Column, Integer, String, Text, DateTime, ForeignKey, Date
+from sqlalchemy import Column, Integer, String, Text, DateTime, ForeignKey, Date, Boolean
 from sqlalchemy.sql import func
+from sqlalchemy.orm import relationship
 from .database import Base
+
+class PlanoAcao(Base):
+    __tablename__ = "planos_acao"
+    id = Column(Integer, primary_key=True, index=True)
+    o_que = Column(Text, nullable=False)
+    por_que = Column(Text, nullable=False)
+    onde = Column(Text, nullable=False)
+    quando = Column(Text, nullable=False)
+    quem = Column(Text, nullable=False)
+    como = Column(Text, nullable=False)
+    quanto_custa = Column(Text, nullable=False)
+    status = Column(String, nullable=False, default="Aguardando Análise NSP")
+    data_criacao = Column(DateTime(timezone=True), server_default=func.now())
+    data_atualizacao = Column(DateTime(timezone=True), onupdate=func.now())
 
 class Usuario(Base):
     __tablename__ = "usuarios"
@@ -38,6 +53,11 @@ class Notificacao(Base):
     produto_lote_serie = Column(String, nullable=True)
     produto_validade = Column(String, nullable=True)
     
+    requer_plano_acao = Column(Boolean, nullable=False, default=False)
+    id_plano_acao = Column(Integer, ForeignKey("planos_acao.id"), nullable=True)
+    
     data_criacao = Column(DateTime(timezone=True), server_default=func.now())
     data_triagem_nsp = Column(DateTime(timezone=True), nullable=True)
     data_resposta_setor = Column(DateTime(timezone=True), nullable=True)
+
+    plano_acao = relationship("PlanoAcao")
