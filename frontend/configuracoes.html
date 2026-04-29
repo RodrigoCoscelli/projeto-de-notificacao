@@ -106,8 +106,7 @@
                         </div>
                         <div>
                             <label class="block text-sm font-medium mb-1">Novo E-mail</label>
-                            <input type="email" id="me_email"
-                                class="w-full rounded-lg border-outline-variant px-4 py-2"
+                            <input type="email" id="me_email" class="w-full rounded-lg border-outline-variant px-4 py-2"
                                 placeholder="Deixe em branco para não alterar">
                         </div>
                         <div>
@@ -197,32 +196,127 @@
                         </div>
                     </div>
                 </div>
+                <!-- Configuração de Prazos Padrão -->
+                <div class="p-6 border-t border-surface-container bg-surface-container-lowest">
+                    <h3 class="font-bold mb-4 text-on-surface border-b pb-2 flex items-center">
+                        <span class="material-symbols-outlined mr-2 text-primary">schedule</span>
+                        Configuração de Prazos Padrão
+                    </h3>
+                    <p class="text-sm text-on-surface-variant mb-6">
+                        Defina o prazo padrão (em dias) para a investigação de cada classificação de incidente.
+                    </p>
+
+                    <form id="prazosForm" class="max-w-3xl">
+                        <div class="overflow-x-auto border border-surface-container rounded-lg mb-6">
+                            <table class="w-full text-left border-collapse">
+                                <thead
+                                    class="bg-surface-container-low text-xs font-bold text-on-surface-variant uppercase tracking-wider">
+                                    <tr>
+                                        <th class="px-4 py-3 w-2/3">Classificação do Incidente</th>
+                                        <th class="px-4 py-3 w-1/3">Prazo (em dias)</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-surface-container text-sm">
+                                    <tr class="hover:bg-surface-container-low/50 transition-colors">
+                                        <td class="px-4 py-3 font-medium text-on-surface">Near Miss</td>
+                                        <td class="px-4 py-2">
+                                            <input type="number" min="0" id="prazo_near_miss"
+                                                class="w-full rounded-lg border-outline-variant px-4 py-2 focus:border-primary focus:ring-primary outline-none"
+                                                placeholder="Ex: 5" required>
+                                        </td>
+                                    </tr>
+                                    <tr class="hover:bg-surface-container-low/50 transition-colors">
+                                        <td class="px-4 py-3 font-medium text-on-surface">Incidente sem dano</td>
+                                        <td class="px-4 py-2">
+                                            <input type="number" min="0" id="prazo_incidente_sem_dano"
+                                                class="w-full rounded-lg border-outline-variant px-4 py-2 focus:border-primary focus:ring-primary outline-none"
+                                                placeholder="Ex: 10" required>
+                                        </td>
+                                    </tr>
+                                    <tr class="hover:bg-surface-container-low/50 transition-colors">
+                                        <td class="px-4 py-3 font-medium text-on-surface">Evento adverso leve</td>
+                                        <td class="px-4 py-2">
+                                            <input type="number" min="0" id="prazo_evento_leve"
+                                                class="w-full rounded-lg border-outline-variant px-4 py-2 focus:border-primary focus:ring-primary outline-none"
+                                                placeholder="Ex: 15" required>
+                                        </td>
+                                    </tr>
+                                    <tr class="hover:bg-surface-container-low/50 transition-colors">
+                                        <td class="px-4 py-3 font-medium text-on-surface">Evento adverso moderado</td>
+                                        <td class="px-4 py-2">
+                                            <input type="number" min="0" id="prazo_evento_moderado"
+                                                class="w-full rounded-lg border-outline-variant px-4 py-2 focus:border-primary focus:ring-primary outline-none"
+                                                placeholder="Ex: 30" required>
+                                        </td>
+                                    </tr>
+                                    <tr class="hover:bg-surface-container-low/50 transition-colors">
+                                        <td class="px-4 py-3 font-medium text-on-surface">Evento adverso grave</td>
+                                        <td class="px-4 py-2">
+                                            <input type="number" min="0" id="prazo_evento_grave"
+                                                class="w-full rounded-lg border-outline-variant px-4 py-2 focus:border-primary focus:ring-primary outline-none"
+                                                placeholder="Ex: 45" required>
+                                        </td>
+                                    </tr>
+                                    <tr class="hover:bg-surface-container-low/50 transition-colors">
+                                        <td class="px-4 py-3 font-medium text-on-surface">Óbito/Never Event <span class="text-xs font-normal text-on-surface-variant">(prazo em horas)</span></td>
+                                        <td class="px-4 py-2">
+                                            <input type="number" min="0" id="prazo_obito"
+                                                class="w-full rounded-lg border-outline-variant px-4 py-2 focus:border-primary focus:ring-primary outline-none"
+                                                placeholder="Ex: 5" required>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="flex justify-end">
+                            <button type="submit"
+                                class="bg-primary text-white px-6 py-2 rounded-lg font-bold hover:opacity-90 transition-opacity flex items-center">
+                                <span class="material-symbols-outlined mr-2 text-sm">save</span>
+                                Salvar Prazos
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
 
         </div>
     </main>
 
     <!-- Modals -->
-    <div id="confirmSectorModal" class="hidden fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm">
-        <div class="bg-surface-container-lowest rounded-xl shadow-lg p-6 max-w-sm w-full mx-4 border border-surface-container">
+    <div id="confirmSectorModal"
+        class="hidden fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm">
+        <div
+            class="bg-surface-container-lowest rounded-xl shadow-lg p-6 max-w-sm w-full mx-4 border border-surface-container">
             <h3 class="text-lg font-bold text-on-surface mb-2 brand-font">Confirmar Alteração</h3>
-            <p class="text-sm text-on-surface-variant mb-6" id="confirmSectorMsg">Tem certeza que deseja alterar o setor deste usuário?</p>
+            <p class="text-sm text-on-surface-variant mb-6" id="confirmSectorMsg">Tem certeza que deseja alterar o setor
+                deste usuário?</p>
             <div class="flex justify-end gap-3">
-                <button id="cancelSectorBtn" class="px-4 py-2 text-sm font-bold text-on-surface hover:bg-surface-container rounded-lg transition-colors">Cancelar</button>
-                <button id="confirmSectorBtn" class="px-4 py-2 text-sm font-bold bg-primary text-white hover:bg-primary/90 rounded-lg transition-colors">Confirmar</button>
+                <button id="cancelSectorBtn"
+                    class="px-4 py-2 text-sm font-bold text-on-surface hover:bg-surface-container rounded-lg transition-colors">Cancelar</button>
+                <button id="confirmSectorBtn"
+                    class="px-4 py-2 text-sm font-bold bg-primary text-white hover:bg-primary/90 rounded-lg transition-colors">Confirmar</button>
             </div>
         </div>
     </div>
 
-    <div id="confirmDeleteModal" class="hidden fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm">
-        <div class="bg-surface-container-lowest rounded-xl shadow-lg p-6 max-w-sm w-full mx-4 border border-surface-container">
-            <h3 class="text-lg font-bold text-error mb-2 brand-font flex items-center"><span class="material-symbols-outlined mr-2">warning</span>Excluir Usuário</h3>
+    <div id="confirmDeleteModal"
+        class="hidden fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm">
+        <div
+            class="bg-surface-container-lowest rounded-xl shadow-lg p-6 max-w-sm w-full mx-4 border border-surface-container">
+            <h3 class="text-lg font-bold text-error mb-2 brand-font flex items-center"><span
+                    class="material-symbols-outlined mr-2">warning</span>Excluir Usuário</h3>
             <p class="text-sm text-on-surface-variant mb-4" id="confirmDeleteMsg">Tem certeza dessa ação?</p>
-            <p class="text-xs text-on-surface-variant mb-2">Para confirmar, digite <strong>excluir usuário</strong> abaixo:</p>
-            <input type="text" id="deleteConfirmInput" class="w-full rounded-lg border-error/50 px-4 py-2 text-sm mb-6 focus:border-error focus:ring-error outline-none" autocomplete="off">
+            <p class="text-xs text-on-surface-variant mb-2">Para confirmar, digite <strong>excluir usuário</strong>
+                abaixo:</p>
+            <input type="text" id="deleteConfirmInput"
+                class="w-full rounded-lg border-error/50 px-4 py-2 text-sm mb-6 focus:border-error focus:ring-error outline-none"
+                autocomplete="off">
             <div class="flex justify-end gap-3">
-                <button id="cancelDeleteBtn" class="px-4 py-2 text-sm font-bold text-on-surface hover:bg-surface-container rounded-lg transition-colors">Cancelar</button>
-                <button id="confirmDeleteBtn" class="px-4 py-2 text-sm font-bold bg-error text-white hover:bg-error/90 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed" disabled>Excluir</button>
+                <button id="cancelDeleteBtn"
+                    class="px-4 py-2 text-sm font-bold text-on-surface hover:bg-surface-container rounded-lg transition-colors">Cancelar</button>
+                <button id="confirmDeleteBtn"
+                    class="px-4 py-2 text-sm font-bold bg-error text-white hover:bg-error/90 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    disabled>Excluir</button>
             </div>
         </div>
     </div>
@@ -243,12 +337,13 @@
                 if (currentUser.setor === 'NSP') {
                     document.getElementById('adminPanel').classList.remove('hidden');
                     loadUsers();
+                    loadPrazos();
                 }
             } catch (e) {
                 window.location.href = '/login.html';
             }
         }
-
+        // alterar perfil
         document.getElementById('profileForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const username = document.getElementById('me_username').value.trim();
@@ -307,16 +402,16 @@
                         <td class="px-4 py-3 font-bold ${isMe ? 'text-primary' : ''}">${u.username} ${isMe ? '(Você)' : ''}</td>
                         <td class="px-4 py-3 text-sm text-on-surface-variant">${u.email || '-'}</td>
                         <td class="px-4 py-3">
-                            ${isMe ? 
-                                `<span class="px-2 py-1 bg-surface-variant rounded text-[11px] font-bold">${u.setor}</span>` : 
-                                `<select class="rounded border-outline-variant text-[11px] font-bold py-1 px-2" onchange="promptChangeSector(${u.id}, '${u.username}', '${u.setor}', this)">
+                            ${isMe ?
+                            `<span class="px-2 py-1 bg-surface-variant rounded text-[11px] font-bold">${u.setor}</span>` :
+                            `<select class="rounded border-outline-variant text-[11px] font-bold py-1 px-2" onchange="promptChangeSector(${u.id}, '${u.username}', '${u.setor}', this)">
                                     <option value="NSP" ${u.setor === 'NSP' ? 'selected' : ''}>NSP</option>
                                     <option value="Recepção" ${u.setor === 'Recepção' ? 'selected' : ''}>Recepção</option>
                                     <option value="Enfermagem" ${u.setor === 'Enfermagem' ? 'selected' : ''}>Enfermagem</option>
                                     <option value="Farmácia" ${u.setor === 'Farmácia' ? 'selected' : ''}>Farmácia</option>
                                     <option value="Centro Cirúrgico" ${u.setor === 'Centro Cirúrgico' ? 'selected' : ''}>Centro Cirúrgico</option>
                                 </select>`
-                            }
+                        }
                         </td>
                         <td class="px-4 py-3 text-right">
                             <button onclick="deleteUser(${u.id}, '${u.username}')" class="text-error hover:bg-error/10 p-1.5 rounded transition-colors ${isMe ? 'opacity-50 cursor-not-allowed' : ''}" ${isMe ? 'disabled' : ''} title="Excluir Usuário">
@@ -366,7 +461,7 @@
             if (newSector === oldSector) return;
 
             pendingSectorChange = { userId, username, oldSector, newSector, selectElement };
-            
+
             document.getElementById('confirmSectorMsg').innerText = `Tem certeza que deseja alterar o setor do usuário '${username}' para '${newSector}'?`;
             document.getElementById('confirmSectorModal').classList.remove('hidden');
         }
@@ -381,17 +476,17 @@
 
         document.getElementById('confirmSectorBtn').addEventListener('click', async () => {
             if (!pendingSectorChange) return;
-            
+
             const { userId, newSector, selectElement } = pendingSectorChange;
             document.getElementById('confirmSectorModal').classList.add('hidden');
-            
+
             try {
                 const res = await apiFetch(`/api/users/${userId}`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ setor: newSector })
                 });
-                
+
                 if (res.ok) {
                     loadUsers();
                 } else {
@@ -403,7 +498,7 @@
                 alert("Erro de conexão");
                 selectElement.value = pendingSectorChange.oldSector;
             }
-            
+
             pendingSectorChange = null;
         });
 
@@ -429,7 +524,7 @@
 
         document.getElementById('confirmDeleteBtn').addEventListener('click', async () => {
             if (!pendingDelete) return;
-            
+
             const { id } = pendingDelete;
             document.getElementById('confirmDeleteModal').classList.add('hidden');
             pendingDelete = null;
@@ -446,6 +541,83 @@
                 alert("Erro de conexão");
             }
         });
+
+        // Prazos
+        async function loadPrazos() {
+            try {
+                const res = await apiFetch('/api/configuracoes/prazos');
+                if (!res.ok) return;
+                const prazos = await res.json();
+
+                // Mapa de classificacao => campo id
+                const mapa = {
+                    'Near miss': 'prazo_near_miss',
+                    'Incidente sem dano': 'prazo_incidente_sem_dano',
+                    'Evento Adverso leve': 'prazo_evento_leve',
+                    'Evento Adverso moderado': 'prazo_evento_moderado',
+                    'Evento Adverso grave': 'prazo_evento_grave',
+                    'Óbito/Never Events': 'prazo_obito',
+                };
+
+                prazos.forEach(p => {
+                    const fieldId = mapa[p.classificacao_risco];
+                    if (fieldId) {
+                        const el = document.getElementById(fieldId);
+                        if (el) {
+                            // Para Óbito, mostramos as horas
+                            el.value = (p.prazo_dias === 0 && p.prazo_horas) ? p.prazo_horas : p.prazo_dias;
+                        }
+                    }
+                });
+            } catch (e) {
+                console.error('Erro ao carregar prazos:', e);
+            }
+        }
+
+        document.getElementById('prazosForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const mapa = [
+                { classificacao_risco: 'Near miss', fieldId: 'prazo_near_miss', isHoras: false },
+                { classificacao_risco: 'Incidente sem dano', fieldId: 'prazo_incidente_sem_dano', isHoras: false },
+                { classificacao_risco: 'Evento Adverso leve', fieldId: 'prazo_evento_leve', isHoras: false },
+                { classificacao_risco: 'Evento Adverso moderado', fieldId: 'prazo_evento_moderado', isHoras: false },
+                { classificacao_risco: 'Evento Adverso grave', fieldId: 'prazo_evento_grave', isHoras: false },
+                { classificacao_risco: 'Óbito/Never Events', fieldId: 'prazo_obito', isHoras: true },
+            ];
+
+            const prazos = mapa.map(m => ({
+                classificacao_risco: m.classificacao_risco,
+                prazo_dias: m.isHoras ? 0 : parseInt(document.getElementById(m.fieldId).value),
+                prazo_horas: m.isHoras ? parseInt(document.getElementById(m.fieldId).value) : null
+            }));
+
+            try {
+                const res = await apiFetch('/api/configuracoes/prazos', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ prazos })
+                });
+                if (res.ok) {
+                    showToast('✓ Prazos salvos com sucesso!', 'success');
+                } else {
+                    const err = await res.json();
+                    showToast('Erro: ' + (err.detail || 'Não foi possível salvar'), 'error');
+                }
+            } catch (e) {
+                showToast('Erro de conexão', 'error');
+            }
+        });
+
+        function showToast(msg, type = 'success') {
+            const toast = document.createElement('div');
+            const colors = type === 'success'
+                ? 'bg-green-600 text-white'
+                : 'bg-red-600 text-white';
+            toast.className = `fixed bottom-6 right-6 z-[200] px-5 py-3 rounded-xl shadow-lg text-sm font-bold ${colors} transition-all`;
+            toast.innerText = msg;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
 
         init();
     </script>

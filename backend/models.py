@@ -3,6 +3,13 @@ from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 from .database import Base
 
+class ConfiguracaoPrazo(Base):
+    __tablename__ = "configuracoes_prazo"
+    id = Column(Integer, primary_key=True, index=True)
+    classificacao_risco = Column(String, unique=True, nullable=False, index=True)
+    prazo_dias = Column(Integer, nullable=False)  # -1 = horas (apenas para Óbito), positivo = dias
+    prazo_horas = Column(Integer, nullable=True)  # usado quando prazo é em horas (ex: Óbito = 5)
+
 class PlanoAcao(Base):
     __tablename__ = "planos_acao"
     id = Column(Integer, primary_key=True, index=True)
@@ -60,5 +67,7 @@ class Notificacao(Base):
     data_criacao = Column(DateTime(timezone=True), server_default=func.now())
     data_triagem_nsp = Column(DateTime(timezone=True), nullable=True)
     data_resposta_setor = Column(DateTime(timezone=True), nullable=True)
+    data_prazo_limite = Column(DateTime(timezone=True), nullable=True)
+    bloqueado_por_atraso = Column(Boolean, nullable=False, default=False)
 
     plano_acao = relationship("PlanoAcao")

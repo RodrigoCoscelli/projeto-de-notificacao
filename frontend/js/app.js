@@ -109,9 +109,14 @@ function getStatusColorClass(status) {
         return 'bg-green-100 text-green-800 border border-green-200';
     }
     
-    // Vermelho (Recusado / Erro)
-    if (s.includes('recusado') || s.includes('cancelado')) {
+    // Vermelho (Recusado / Bloqueado)
+    if (s.includes('recusado') || s.includes('cancelado') || s.includes('bloqueada')) {
         return 'bg-red-100 text-red-800 border border-red-200';
+    }
+    
+    // Laranja (Aguardando conclusão do setor)
+    if (s.includes('aguardando conclusão')) {
+        return 'bg-orange-100 text-orange-800 border border-orange-200';
     }
     
     // Azul / Laranja / Amarelo (Em andamento / Aguardando)

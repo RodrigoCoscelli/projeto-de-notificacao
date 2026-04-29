@@ -25,7 +25,7 @@ def gerar_protocolo(db: Session):
             return protocolo
 
 
-from datetime import datetime
+from datetime import datetime, timedelta
 
 @router.post("", response_model=schemas.NotificacaoPublic)
 def criar_notificacao(
@@ -142,6 +142,18 @@ def triagem_nsp(id: int, triagem: schemas.NotificacaoTriagem, db: Session = Depe
         
     notificacao.data_triagem_nsp = datetime.now()
     
+    # Calcular prazo limite com base na classificação de risco
+    if notificacao.classificacao_risco and notificacao.status != "Encerrada":
+        prazo_config = db.query(models.ConfiguracaoPrazo).filter(
+            models.ConfiguracaoPrazo.classificacao_risco == notificacao.classificacao_risco
+        ).first()
+        if prazo_config:
+            if prazo_config.prazo_dias == 0 and prazo_config.prazo_horas:
+                # Prazo em horas (ex: Óbito = 5 horas)
+                notificacao.data_prazo_limite = datetime.now() + timedelta(hours=prazo_config.prazo_horas)
+            else:
+                notificacao.data_prazo_limite = datetime.now() + timedelta(days=prazo_config.prazo_dias)
+    
     db.commit()
     db.refresh(notificacao)
     return notificacao
@@ -154,6 +166,17 @@ def resposta_setor(id: int, resposta: schemas.NotificacaoResposta, db: Session =
 
     if notificacao.setor_notificado_definitivo != current_user.setor:
         raise HTTPException(status_code=403, detail="Você não pertence ao setor notificado desta ocorrência")
+
+    # Verificar se o prazo expirou e bloquear automaticamente
+    if notificacao.data_prazo_limite and datetime.now() > notificacao.data_prazo_limite:
+        if not notificacao.bloqueado_por_atraso:
+            notificacao.bloqueado_por_atraso = True
+            db.commit()
+            db.refresh(notificacao)
+        raise HTTPException(status_code=403, detail="Esta notificação está bloqueada por atraso no prazo. Solicite liberação ao NSP.")
+
+    if notificacao.bloqueado_por_atraso:
+        raise HTTPException(status_code=403, detail="Esta notificação está bloqueada por atraso no prazo. Solicite liberação ao NSP.")
 
     notificacao.justificativa_analise = resposta.justificativa_analise
     notificacao.tratativa_acao = resposta.tratativa_acao
@@ -233,6 +256,26 @@ def concluir_plano_acao(id: int, db: Session = Depends(database.get_db), current
     notificacao.plano_acao.status = "Concluído"
     notificacao.plano_acao.data_conclusao = datetime.now()
     notificacao.status = "Encerrada"
+    
+    db.commit()
+    db.refresh(notificacao)
+    return notificacao
+
+class DesbloquearSchema(schemas.BaseModel):
+    dias_extras: int  # Dias extras a serem adicionados ao prazo
+
+@router.put("/{id}/desbloquear", response_model=schemas.Notificacao)
+def desbloquear_notificacao(id: int, payload: DesbloquearSchema, db: Session = Depends(database.get_db), current_user: models.Usuario = Depends(get_current_user)):
+    if current_user.setor != "NSP":
+        raise HTTPException(status_code=403, detail="Apenas NSP pode desbloquear notificações")
+    
+    notificacao = db.query(models.Notificacao).filter(models.Notificacao.id == id).first()
+    if not notificacao:
+        raise HTTPException(status_code=404, detail="Não encontrada")
+    
+    notificacao.bloqueado_por_atraso = False
+    # Estender prazo a partir de agora
+    notificacao.data_prazo_limite = datetime.now() + timedelta(days=payload.dias_extras)
     
     db.commit()
     db.refresh(notificacao)

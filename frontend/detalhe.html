@@ -85,6 +85,11 @@
         </header>
 
         <div class="mt-16 p-8">
+            <!-- Banner de Prazo -->
+            <div id="bannerPrazo" class="hidden max-w-4xl mx-auto mb-4 px-5 py-3 rounded-xl flex items-center gap-3 text-sm font-semibold">
+                <span id="bannerPrazoIcon" class="material-symbols-outlined text-xl"></span>
+                <span id="bannerPrazoMsg"></span>
+            </div>
             <div
                 class="max-w-4xl mx-auto bg-surface-container-lowest p-8 rounded-xl shadow border border-surface-container">
                 <div class="flex justify-between items-center mb-6">
@@ -312,6 +317,20 @@
                     </div>
                 </div>
 
+                <!-- Bloco Bloqueio por Atraso -->
+                <div id="blocoBloqueio" class="hidden space-y-4">
+                    <div class="bg-red-50 border border-red-200 rounded-xl p-5 flex items-start gap-4">
+                        <span class="material-symbols-outlined text-error text-3xl mt-0.5">lock</span>
+                        <div class="flex-1">
+                            <h4 class="font-bold text-error text-base mb-1">Notificação Bloqueada por Atraso</h4>
+                            <p class="text-sm text-red-700">O prazo para resposta foi excedido. O setor não pode responder até que o NSP libere a notificação e defina um novo prazo.</p>
+                        </div>
+                        <button id="btnDesbloquearNSP" onclick="abrirModalDesbloquear()" class="hidden bg-primary text-white px-4 py-2 rounded-lg font-bold text-sm hover:opacity-90 whitespace-nowrap">
+                            <span class="material-symbols-outlined text-sm align-middle mr-1">lock_open</span>Desbloquear
+                        </button>
+                    </div>
+                </div>
+
                 <!-- Bloco Conclusão do Plano de Ação -->
                 <div id="blocoConcluirPlano" class="hidden space-y-6">
                     <h3 class="text-xl font-bold text-primary brand-font border-l-4 border-secondary pl-3">Ação: Concluir Plano de Ação</h3>
@@ -369,18 +388,73 @@
     <!-- Modal de Encerramento -->
     <div id="modalEncerramento" class="hidden fixed inset-0 z-[100] flex items-center justify-center">
         <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="fecharModalEncerramento()"></div>
-        <div class="relative bg-white rounded-xl shadow-2xl p-8 max-w-lg w-full mx-4 animate-[fadeIn_0.2s_ease-out]">
-            <h3 class="text-xl font-bold text-error brand-font mb-2">Encerrar Notificação</h3>
-            <p class="text-sm text-on-surface-variant mb-4">Informe o motivo pelo qual esta notificação está sendo
-                encerrada.</p>
-            <textarea id="motivo_encerramento" rows="4" class="w-full rounded-lg border-outline-variant px-4 py-2 mb-4"
-                placeholder="Ex: Não se aplica como notificação de evento adverso..."></textarea>
+        <div class="relative bg-white rounded-xl shadow-2xl p-8 max-w-lg w-full mx-4">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center">
+                    <span class="material-symbols-outlined text-error text-xl">warning</span>
+                </div>
+                <h3 class="text-xl font-bold text-error brand-font">Encerrar Notificação</h3>
+            </div>
+            <p class="text-sm text-on-surface-variant mb-4">Informe o motivo pelo qual esta notificação está sendo encerrada.</p>
+            <textarea id="motivo_encerramento" rows="4" class="w-full rounded-lg border-outline-variant px-4 py-2 mb-4" placeholder="Ex: Não se aplica como notificação de evento adverso..."></textarea>
             <div class="flex justify-end space-x-3">
-                <button type="button" onclick="fecharModalEncerramento()"
-                    class="px-5 py-2 rounded-lg border border-outline-variant text-on-surface font-medium hover:bg-surface-container">Cancelar</button>
-                <button type="button" onclick="confirmarEncerramento()"
-                    class="px-5 py-2 rounded-lg bg-error text-white font-bold hover:opacity-90">Confirmar
-                    Encerramento</button>
+                <button type="button" onclick="fecharModalEncerramento()" class="px-5 py-2 rounded-lg border border-outline-variant text-on-surface font-medium hover:bg-surface-container">Cancelar</button>
+                <button type="button" onclick="confirmarEncerramento()" class="px-5 py-2 rounded-lg bg-error text-white font-bold hover:opacity-90">Confirmar Encerramento</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Confirmação Genérico -->
+    <div id="modalConfirm" class="hidden fixed inset-0 z-[110] flex items-center justify-center">
+        <div class="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
+        <div class="relative bg-white rounded-xl shadow-2xl p-8 max-w-md w-full mx-4">
+            <div class="flex items-center gap-3 mb-4">
+                <div id="modalConfirmIcon" class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
+                    <span id="modalConfirmIconText" class="material-symbols-outlined text-primary text-xl">help</span>
+                </div>
+                <h3 id="modalConfirmTitle" class="text-lg font-bold text-on-surface brand-font">Confirmar</h3>
+            </div>
+            <p id="modalConfirmMsg" class="text-sm text-on-surface-variant mb-6"></p>
+            <div class="flex justify-end space-x-3">
+                <button id="modalConfirmCancel" class="px-5 py-2 rounded-lg border border-outline-variant text-on-surface font-medium hover:bg-surface-container">Cancelar</button>
+                <button id="modalConfirmOk" class="px-5 py-2 rounded-lg bg-primary text-white font-bold hover:opacity-90">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Alerta/Toast -->
+    <div id="modalAlert" class="hidden fixed inset-0 z-[120] flex items-center justify-center">
+        <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="fecharAlert()"></div>
+        <div class="relative bg-white rounded-xl shadow-2xl p-8 max-w-md w-full mx-4">
+            <div class="flex items-center gap-3 mb-4">
+                <div id="alertIconBox" class="w-10 h-10 rounded-full flex items-center justify-center"></div>
+                <h3 id="alertTitle" class="text-lg font-bold brand-font"></h3>
+            </div>
+            <p id="alertMsg" class="text-sm text-on-surface-variant mb-6"></p>
+            <div class="flex justify-end">
+                <button onclick="fecharAlert()" id="alertOkBtn" class="px-5 py-2 rounded-lg font-bold text-white">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Desbloquear NSP -->
+    <div id="modalDesbloquear" class="hidden fixed inset-0 z-[110] flex items-center justify-center">
+        <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="fecharModalDesbloquear()"></div>
+        <div class="relative bg-white rounded-xl shadow-2xl p-8 max-w-md w-full mx-4">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
+                    <span class="material-symbols-outlined text-primary text-xl">lock_open</span>
+                </div>
+                <h3 class="text-lg font-bold text-primary brand-font">Desbloquear Notificação</h3>
+            </div>
+            <p class="text-sm text-on-surface-variant mb-4">Esta notificação está bloqueada por atraso. Defina quantos dias extras de prazo o setor terá para responder a partir de agora.</p>
+            <div class="mb-6">
+                <label class="block text-sm font-medium mb-1">Dias extras de prazo</label>
+                <input type="number" id="diasExtrasInput" min="1" value="7" class="w-full rounded-lg border-outline-variant px-4 py-2">
+            </div>
+            <div class="flex justify-end space-x-3">
+                <button onclick="fecharModalDesbloquear()" class="px-5 py-2 rounded-lg border border-outline-variant text-on-surface font-medium hover:bg-surface-container">Cancelar</button>
+                <button onclick="confirmarDesbloquear()" class="px-5 py-2 rounded-lg bg-primary text-white font-bold hover:opacity-90">Desbloquear</button>
             </div>
         </div>
     </div>
@@ -388,6 +462,121 @@
     <script>
         let currentUser = null;
         let notifId = new URLSearchParams(window.location.search).get('id');
+
+        // ---- Modais Customizados ----
+        function showAlert(title, msg, type = 'success', onClose = null) {
+            const configs = {
+                success: { icon: 'check_circle', iconBg: 'bg-green-100', iconColor: 'text-green-600', titleColor: 'text-green-800', btnBg: 'bg-green-600' },
+                error:   { icon: 'cancel', iconBg: 'bg-red-100', iconColor: 'text-error', titleColor: 'text-error', btnBg: 'bg-error' },
+                info:    { icon: 'info', iconBg: 'bg-blue-100', iconColor: 'text-primary', titleColor: 'text-primary', btnBg: 'bg-primary' },
+                warning: { icon: 'warning', iconBg: 'bg-yellow-100', iconColor: 'text-yellow-700', titleColor: 'text-yellow-800', btnBg: 'bg-yellow-600' },
+            };
+            const c = configs[type] || configs.info;
+            document.getElementById('alertIconBox').className = `w-10 h-10 rounded-full flex items-center justify-center ${c.iconBg}`;
+            document.getElementById('alertIconBox').innerHTML = `<span class="material-symbols-outlined ${c.iconColor} text-xl">${c.icon}</span>`;
+            document.getElementById('alertTitle').className = `text-lg font-bold brand-font ${c.titleColor}`;
+            document.getElementById('alertTitle').innerText = title;
+            document.getElementById('alertMsg').innerText = msg;
+            document.getElementById('alertOkBtn').className = `px-5 py-2 rounded-lg font-bold text-white ${c.btnBg}`;
+            document.getElementById('modalAlert')._onClose = onClose;
+            document.getElementById('modalAlert').classList.remove('hidden');
+        }
+
+        function fecharAlert() {
+            const modal = document.getElementById('modalAlert');
+            modal.classList.add('hidden');
+            if (modal._onClose) { modal._onClose(); modal._onClose = null; }
+        }
+
+        function showConfirm(title, msg, onConfirm, type = 'info') {
+            const configs = {
+                info:    { icon: 'help', iconBg: 'bg-blue-100', iconColor: 'text-primary', okBg: 'bg-primary' },
+                warning: { icon: 'warning', iconBg: 'bg-yellow-100', iconColor: 'text-yellow-700', okBg: 'bg-yellow-600' },
+                success: { icon: 'check_circle', iconBg: 'bg-green-100', iconColor: 'text-green-600', okBg: 'bg-green-600' },
+            };
+            const c = configs[type] || configs.info;
+            document.getElementById('modalConfirmIcon').className = `w-10 h-10 rounded-full flex items-center justify-center ${c.iconBg}`;
+            document.getElementById('modalConfirmIconText').className = `material-symbols-outlined ${c.iconColor} text-xl`;
+            document.getElementById('modalConfirmIconText').innerText = c.icon;
+            document.getElementById('modalConfirmTitle').innerText = title;
+            document.getElementById('modalConfirmMsg').innerText = msg;
+            document.getElementById('modalConfirmOk').className = `px-5 py-2 rounded-lg font-bold text-white ${c.okBg}`;
+            document.getElementById('modalConfirmOk').onclick = () => {
+                document.getElementById('modalConfirm').classList.add('hidden');
+                if (onConfirm) onConfirm();
+            };
+            document.getElementById('modalConfirmCancel').onclick = () => {
+                document.getElementById('modalConfirm').classList.add('hidden');
+            };
+            document.getElementById('modalConfirm').classList.remove('hidden');
+        }
+
+        // ---- Desbloquear NSP ----
+        function abrirModalDesbloquear() {
+            document.getElementById('diasExtrasInput').value = 7;
+            document.getElementById('modalDesbloquear').classList.remove('hidden');
+        }
+
+        function fecharModalDesbloquear() {
+            document.getElementById('modalDesbloquear').classList.add('hidden');
+        }
+
+        async function confirmarDesbloquear() {
+            const dias = parseInt(document.getElementById('diasExtrasInput').value);
+            if (!dias || dias < 1) {
+                showAlert('Campo obrigatório', 'Informe ao menos 1 dia extra.', 'warning');
+                return;
+            }
+            fecharModalDesbloquear();
+            const res = await apiFetch(`/api/notificacoes/${notifId}/desbloquear`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ dias_extras: dias })
+            });
+            if (res.ok) {
+                showAlert('Desbloqueada!', `Notificação desbloqueada com ${dias} dia(s) extra(s) de prazo.`, 'success', () => window.location.reload());
+            } else {
+                showAlert('Erro', 'Não foi possível desbloquear.', 'error');
+            }
+        }
+
+        // ---- Banner de Prazo ----
+        function exibirBannerPrazo(prazoLimite, bloqueado) {
+            const banner = document.getElementById('bannerPrazo');
+            const bannerIcon = document.getElementById('bannerPrazoIcon');
+            const bannerMsg = document.getElementById('bannerPrazoMsg');
+
+            if (bloqueado) {
+                banner.className = 'max-w-4xl mx-auto mb-4 px-5 py-3 rounded-xl flex items-center gap-3 text-sm font-semibold bg-red-100 text-red-800 border border-red-200';
+                bannerIcon.innerText = 'lock';
+                bannerMsg.innerText = 'Notificação BLOQUEADA — prazo excedido. Aguardando liberação do NSP.';
+                banner.classList.remove('hidden');
+                return;
+            }
+
+            if (!prazoLimite) return;
+
+            const limite = new Date(prazoLimite);
+            const agora = new Date();
+            const diffMs = limite - agora;
+            const diffH = Math.floor(diffMs / 36e5);
+            const diffD = Math.floor(diffMs / 864e5);
+
+            if (diffMs <= 0) {
+                banner.className = 'max-w-4xl mx-auto mb-4 px-5 py-3 rounded-xl flex items-center gap-3 text-sm font-semibold bg-red-100 text-red-800 border border-red-200';
+                bannerIcon.innerText = 'alarm_off';
+                bannerMsg.innerText = `Prazo expirado em ${limite.toLocaleString('pt-BR')}. Bloqueio automático será aplicado na próxima tentativa de resposta.`;
+            } else if (diffH < 48) {
+                banner.className = 'max-w-4xl mx-auto mb-4 px-5 py-3 rounded-xl flex items-center gap-3 text-sm font-semibold bg-yellow-100 text-yellow-800 border border-yellow-200';
+                bannerIcon.innerText = 'schedule';
+                bannerMsg.innerText = `Prazo se encerra em ${diffH < 1 ? 'menos de 1 hora' : diffH + ' hora(s)'}. Limite: ${limite.toLocaleString('pt-BR')}`;
+            } else {
+                banner.className = 'max-w-4xl mx-auto mb-4 px-5 py-3 rounded-xl flex items-center gap-3 text-sm font-semibold bg-green-50 text-green-800 border border-green-200';
+                bannerIcon.innerText = 'event_available';
+                bannerMsg.innerText = `Prazo para resposta: ${diffD} dia(s). Limite: ${limite.toLocaleString('pt-BR')}`;
+            }
+            banner.classList.remove('hidden');
+        }
 
         const explicacoesEvento = {
             "Evento clínico": "Ocorrência inesperada decorrente das atividades assistenciais envolvendo lesão clínica ou psicológica do paciente.",
@@ -406,10 +595,8 @@
             try {
                 const meRes = await apiFetch('/api/auth/me');
                 currentUser = await meRes.json();
-
                 document.getElementById('userNameHeader').innerText = currentUser.username;
                 document.getElementById('userRoleHeader').innerText = currentUser.setor;
-
                 loadNotificacao();
             } catch (e) { console.error(e); }
         }
@@ -447,6 +634,20 @@
                 document.getElementById('tSemAnexo').classList.add('hidden');
             }
 
+            // Banner de prazo para status ativos
+            const statusAtivo = ['Pendente no Setor','Aguardando Plano de Ação 5W2H','Plano de Ação Recusado','Plano em Análise NSP','Aguardando Conclusão do Plano'];
+            if (statusAtivo.includes(n.status)) {
+                exibirBannerPrazo(n.data_prazo_limite, n.bloqueado_por_atraso);
+            }
+
+            // Bloco de bloqueio por atraso
+            if (n.bloqueado_por_atraso) {
+                document.getElementById('blocoBloqueio').classList.remove('hidden');
+                if (currentUser.setor === 'NSP') {
+                    document.getElementById('btnDesbloquearNSP').classList.remove('hidden');
+                }
+            }
+
             if (n.status === "Aguardando Triagem NSP" && currentUser.setor === "NSP") {
                 document.getElementById('blocoTriagem').classList.remove('hidden');
                 document.getElementById('setor_definitivo').value = n.setor_sugerido;
@@ -464,16 +665,14 @@
                 }
             }
 
-            if ((n.status === "Pendente no Setor" || n.status === "Aguardando Plano de Ação 5W2H" || n.status === "Plano de Ação Recusado") && n.setor_notificado_definitivo === currentUser.setor) {
+            if ((n.status === "Pendente no Setor" || n.status === "Aguardando Plano de Ação 5W2H" || n.status === "Plano de Ação Recusado") && n.setor_notificado_definitivo === currentUser.setor && !n.bloqueado_por_atraso) {
                 document.getElementById('blocoResposta').classList.remove('hidden');
 
                 if (n.requer_plano_acao) {
                     document.getElementById('bloco5W2H').classList.remove('hidden');
-                    // Preencher required nos campos
                     const campos5W2H = ['pa_o_que', 'pa_por_que', 'pa_onde', 'pa_quando', 'pa_quem', 'pa_como', 'pa_quanto_custa'];
                     campos5W2H.forEach(c => document.getElementById(c).required = true);
 
-                    // Pre-fill se for recusa
                     if (n.plano_acao) {
                         document.getElementById('pa_o_que').value = n.plano_acao.o_que;
                         document.getElementById('pa_por_que').value = n.plano_acao.por_que;
@@ -486,7 +685,6 @@
                         document.getElementById('tratativa').value = n.tratativa_acao || "";
                     }
 
-                    // Impedir data anterior ao dia atual no campo "Quando"
                     const today = new Date().toISOString().split('T')[0];
                     document.getElementById('pa_quando').setAttribute('min', today);
                 }
@@ -547,10 +745,9 @@
             const tipoEvento = document.getElementById('tipo_evento').value;
             const classRisco = document.getElementById('classificacao_risco').value;
             const classMeta = document.getElementById('classificacao_meta').value;
-
-            if (!tipoEvento) { alert("Selecione o Tipo do Evento."); return false; }
-            if (!classRisco) { alert("Selecione a Classificação de Risco do Evento."); return false; }
-            if (!classMeta) { alert("Selecione a Classificação da Meta Internacional."); return false; }
+            if (!tipoEvento) { showAlert('Campo obrigatório', 'Selecione o Tipo do Evento.', 'warning'); return false; }
+            if (!classRisco) { showAlert('Campo obrigatório', 'Selecione a Classificação de Risco do Evento.', 'warning'); return false; }
+            if (!classMeta) { showAlert('Campo obrigatório', 'Selecione a Classificação da Meta Internacional.', 'warning'); return false; }
             return true;
         }
 
@@ -566,7 +763,7 @@
         async function confirmarEncerramento() {
             const motivo = document.getElementById('motivo_encerramento').value.trim();
             if (!motivo) {
-                alert("Informe o motivo do encerramento.");
+                showAlert('Campo obrigatório', 'Informe o motivo do encerramento.', 'warning');
                 return;
             }
             fecharModalEncerramento();
@@ -585,9 +782,7 @@
                 status: encerrarDireto ? "Encerrada" : "Pendente no Setor"
             };
 
-            if (motivoEncerramento) {
-                payload.motivo_encerramento = motivoEncerramento;
-            }
+            if (motivoEncerramento) payload.motivo_encerramento = motivoEncerramento;
 
             const res = await apiFetch(`/api/notificacoes/${notifId}/triagem`, {
                 method: 'PUT',
@@ -596,10 +791,9 @@
             });
 
             if (res.ok) {
-                alert("Triagem salva com sucesso!");
-                window.location.reload();
+                showAlert('Triagem salva!', 'A triagem foi registrada com sucesso.', 'success', () => window.location.reload());
             } else {
-                alert("Erro ao salvar triagem.");
+                showAlert('Erro', 'Não foi possível salvar a triagem.', 'error');
             }
         }
 
@@ -615,7 +809,7 @@
                 const quandoValue = document.getElementById('pa_quando').value;
                 const today = new Date().toISOString().split('T')[0];
                 if (quandoValue < today) {
-                    alert("A data em 'Quando' não pode ser anterior ao dia de hoje.");
+                    showAlert('Data inválida', "A data em 'Quando' não pode ser anterior ao dia de hoje.", 'warning');
                     return;
                 }
 
@@ -637,38 +831,48 @@
             });
 
             if (res.ok) {
-                alert("Tratativa/Plano salvo com sucesso!");
-                window.location.reload();
+                showAlert('Tratativa salva!', 'O plano/tratativa foi registrado com sucesso.', 'success', () => window.location.reload());
             } else {
-                alert("Erro ao salvar tratativa.");
+                const err = await res.json();
+                showAlert('Erro', err.detail || 'Não foi possível salvar a tratativa.', 'error');
             }
         });
 
         async function avaliarPlano(statusAnalise) {
-            const res = await apiFetch(`/api/notificacoes/${notifId}/plano_acao/analise`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ status: statusAnalise })
-            });
-            if (res.ok) {
-                alert(`Plano de ação ${statusAnalise}!`);
-                window.location.reload();
-            } else {
-                alert("Erro ao avaliar plano.");
-            }
+            const label = statusAnalise === 'Aprovado' ? 'aprovar' : 'recusar';
+            showConfirm(
+                `${statusAnalise === 'Aprovado' ? 'Aprovar' : 'Recusar'} Plano`,
+                `Tem certeza que deseja ${label} este plano de ação?`,
+                async () => {
+                    const res = await apiFetch(`/api/notificacoes/${notifId}/plano_acao/analise`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ status: statusAnalise })
+                    });
+                    if (res.ok) {
+                        showAlert('Plano ' + statusAnalise + '!', `O plano de ação foi ${label}do com sucesso.`, statusAnalise === 'Aprovado' ? 'success' : 'warning', () => window.location.reload());
+                    } else {
+                        showAlert('Erro', 'Não foi possível avaliar o plano.', 'error');
+                    }
+                },
+                statusAnalise === 'Aprovado' ? 'success' : 'warning'
+            );
         }
 
         async function concluirPlanoAcao() {
-            if (!confirm("Tem certeza que deseja concluir o plano de ação?")) return;
-            const res = await apiFetch(`/api/notificacoes/${notifId}/plano_acao/concluir`, {
-                method: 'PUT'
-            });
-            if (res.ok) {
-                alert(`Plano de ação concluído com sucesso!`);
-                window.location.reload();
-            } else {
-                alert("Erro ao concluir plano.");
-            }
+            showConfirm(
+                'Concluir Plano de Ação',
+                'Tem certeza que deseja concluir o plano de ação? Esta ação encerrará a notificação.',
+                async () => {
+                    const res = await apiFetch(`/api/notificacoes/${notifId}/plano_acao/concluir`, { method: 'PUT' });
+                    if (res.ok) {
+                        showAlert('Concluído!', 'Plano de ação concluído com sucesso. A notificação foi encerrada.', 'success', () => window.location.reload());
+                    } else {
+                        showAlert('Erro', 'Não foi possível concluir o plano.', 'error');
+                    }
+                },
+                'success'
+            );
         }
 
         init();

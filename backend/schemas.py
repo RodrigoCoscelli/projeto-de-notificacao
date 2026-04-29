@@ -1,6 +1,18 @@
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, List
 from datetime import date, datetime
+
+class ConfiguracaoPrazo(BaseModel):
+    classificacao_risco: str
+    prazo_dias: int
+    prazo_horas: Optional[int] = None
+
+    class Config:
+        orm_mode = True
+        from_attributes = True
+
+class ConfiguracaoPrazosUpdate(BaseModel):
+    prazos: List[ConfiguracaoPrazo]
 
 class PlanoAcaoBase(BaseModel):
     o_que: str
@@ -107,6 +119,8 @@ class Notificacao(NotificacaoBase):
     data_criacao: datetime
     data_triagem_nsp: Optional[datetime] = None
     data_resposta_setor: Optional[datetime] = None
+    data_prazo_limite: Optional[datetime] = None
+    bloqueado_por_atraso: bool = False
     requer_plano_acao: bool
     plano_acao: Optional[PlanoAcao] = None
 
