@@ -15,7 +15,8 @@ class PlanoAcao(PlanoAcaoBase):
     id: int
     status: str
     data_criacao: datetime
-    data_atualizacao: Optional[datetime] = None
+    data_aprovacao: Optional[datetime] = None
+    data_conclusao: Optional[datetime] = None
 
     class Config:
         orm_mode = True

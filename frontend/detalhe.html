@@ -312,6 +312,27 @@
                     </div>
                 </div>
 
+                <!-- Bloco Conclusão do Plano de Ação -->
+                <div id="blocoConcluirPlano" class="hidden space-y-6">
+                    <h3 class="text-xl font-bold text-primary brand-font border-l-4 border-secondary pl-3">Ação: Concluir Plano de Ação</h3>
+                    <div class="bg-surface-container-low p-4 rounded text-sm mb-6 border border-outline-variant/30 space-y-2">
+                        <p>O NSP aprovou seu plano de ação e ele está atualmente em andamento. Após finalizar as ações, clique no botão abaixo para concluir.</p>
+                        <div id="cBlocoPlanoAcao" class="mt-4 pt-4 border-t border-outline-variant/30">
+                            <h4 class="font-bold text-secondary mb-2">Plano de Ação 5W2H em Andamento:</h4>
+                            <div class="grid grid-cols-2 gap-y-2 gap-x-4 text-sm">
+                                <div><strong>O que:</strong> <span id="c_pa_o_que"></span></div>
+                                <div><strong>Por que:</strong> <span id="c_pa_por_que"></span></div>
+                                <div><strong>Onde:</strong> <span id="c_pa_onde"></span></div>
+                                <div><strong>Quando:</strong> <span id="c_pa_quando"></span></div>
+                                <div><strong>Quem:</strong> <span id="c_pa_quem"></span></div>
+                                <div><strong>Como:</strong> <span id="c_pa_como"></span></div>
+                                <div><strong>Quanto Custa:</strong> <span id="c_pa_quanto_custa"></span></div>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="button" onclick="concluirPlanoAcao()" class="bg-secondary text-white px-6 py-2 rounded font-bold hover:opacity-90">Concluir Plano de Ação</button>
+                </div>
+
                 <!-- Bloco Notificação Resolvida -->
                 <div id="blocoResolvido"
                     class="hidden space-y-4 bg-surface-container-low p-6 rounded-lg border border-outline-variant/50">
@@ -487,6 +508,19 @@
                 }
             }
 
+            if (n.status === "Aguardando Conclusão do Plano" && n.setor_notificado_definitivo === currentUser.setor) {
+                document.getElementById('blocoConcluirPlano').classList.remove('hidden');
+                if (n.plano_acao) {
+                    document.getElementById('c_pa_o_que').innerText = n.plano_acao.o_que;
+                    document.getElementById('c_pa_por_que').innerText = n.plano_acao.por_que;
+                    document.getElementById('c_pa_onde').innerText = n.plano_acao.onde;
+                    document.getElementById('c_pa_quando').innerText = n.plano_acao.quando;
+                    document.getElementById('c_pa_quem').innerText = n.plano_acao.quem;
+                    document.getElementById('c_pa_como').innerText = n.plano_acao.como;
+                    document.getElementById('c_pa_quanto_custa').innerText = n.plano_acao.quanto_custa;
+                }
+            }
+
             if (n.status === "Respondida" || n.status === "Encerrada") {
                 document.getElementById('blocoResolvido').classList.remove('hidden');
                 if (n.motivo_encerramento) {
@@ -496,7 +530,7 @@
                 document.getElementById('fJust').innerText = n.justificativa_analise || "Sem justificativa";
                 document.getElementById('fTrat').innerText = n.tratativa_acao || "Encerrada via NSP.";
 
-                if (n.plano_acao && n.plano_acao.status === "Aprovado") {
+                if (n.plano_acao && (n.plano_acao.status === "Aprovado" || n.plano_acao.status === "Concluído" || n.plano_acao.status === "Em Andamento")) {
                     document.getElementById('fBlocoPlanoAcao').classList.remove('hidden');
                     document.getElementById('f_pa_o_que').innerText = n.plano_acao.o_que;
                     document.getElementById('f_pa_por_que').innerText = n.plano_acao.por_que;
@@ -621,6 +655,19 @@
                 window.location.reload();
             } else {
                 alert("Erro ao avaliar plano.");
+            }
+        }
+
+        async function concluirPlanoAcao() {
+            if (!confirm("Tem certeza que deseja concluir o plano de ação?")) return;
+            const res = await apiFetch(`/api/notificacoes/${notifId}/plano_acao/concluir`, {
+                method: 'PUT'
+            });
+            if (res.ok) {
+                alert(`Plano de ação concluído com sucesso!`);
+                window.location.reload();
+            } else {
+                alert("Erro ao concluir plano.");
             }
         }
 

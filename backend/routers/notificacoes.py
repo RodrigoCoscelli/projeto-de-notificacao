@@ -103,7 +103,7 @@ def listar_notificacoes(db: Session = Depends(database.get_db), current_user: mo
             or_(
                 and_(
                     models.Notificacao.setor_notificado_definitivo == current_user.setor,
-                    models.Notificacao.status.in_(["Pendente no Setor", "Aguardando Plano de Ação 5W2H", "Plano de Ação Recusado", "Respondida", "Plano em Análise NSP"])
+                    models.Notificacao.status.in_(["Pendente no Setor", "Aguardando Plano de Ação 5W2H", "Plano de Ação Recusado", "Respondida", "Plano em Análise NSP", "Aguardando Conclusão do Plano", "Encerrada"])
                 ),
                 models.Notificacao.setor_notificador == current_user.setor
             )
@@ -206,11 +206,33 @@ def analise_plano_acao(id: int, analise: PlanoAcaoAnaliseSchema, db: Session = D
     if not notificacao or not notificacao.plano_acao:
         raise HTTPException(status_code=404, detail="Plano de ação não encontrado")
 
-    notificacao.plano_acao.status = analise.status
     if analise.status == "Aprovado":
-        notificacao.status = "Encerrada"
+        notificacao.plano_acao.status = "Em Andamento"
+        notificacao.plano_acao.data_aprovacao = datetime.now()
+        notificacao.status = "Aguardando Conclusão do Plano"
     elif analise.status == "Recusado":
+        notificacao.plano_acao.status = analise.status
         notificacao.status = "Plano de Ação Recusado"
+    
+    db.commit()
+    db.refresh(notificacao)
+    return notificacao
+
+@router.put("/{id}/plano_acao/concluir", response_model=schemas.Notificacao)
+def concluir_plano_acao(id: int, db: Session = Depends(database.get_db), current_user: models.Usuario = Depends(get_current_user)):
+    notificacao = db.query(models.Notificacao).filter(models.Notificacao.id == id).first()
+    if not notificacao or not notificacao.plano_acao:
+        raise HTTPException(status_code=404, detail="Plano de ação não encontrado")
+
+    if notificacao.setor_notificado_definitivo != current_user.setor:
+        raise HTTPException(status_code=403, detail="Você não pertence ao setor responsável por este plano")
+
+    if notificacao.plano_acao.status != "Em Andamento":
+        raise HTTPException(status_code=400, detail="Plano de ação não está em andamento")
+
+    notificacao.plano_acao.status = "Concluído"
+    notificacao.plano_acao.data_conclusao = datetime.now()
+    notificacao.status = "Encerrada"
     
     db.commit()
     db.refresh(notificacao)

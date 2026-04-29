@@ -15,7 +15,8 @@ class PlanoAcao(Base):
     quanto_custa = Column(Text, nullable=False)
     status = Column(String, nullable=False, default="Aguardando Análise NSP")
     data_criacao = Column(DateTime(timezone=True), server_default=func.now())
-    data_atualizacao = Column(DateTime(timezone=True), onupdate=func.now())
+    data_aprovacao = Column(DateTime(timezone=True), nullable=True)
+    data_conclusao = Column(DateTime(timezone=True), nullable=True)
 
 class Usuario(Base):
     __tablename__ = "usuarios"
