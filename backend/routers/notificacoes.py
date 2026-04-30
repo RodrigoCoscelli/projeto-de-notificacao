@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form, BackgroundTasks
 from sqlalchemy.orm import Session
 from typing import List, Optional
 import shutil
@@ -7,6 +7,7 @@ import uuid
 
 from .. import models, schemas, database
 from .auth import get_current_user
+from ..email_service import enviar_email
 
 router = APIRouter(prefix="/api/notificacoes", tags=["notificacoes"])
 
@@ -29,6 +30,7 @@ from datetime import datetime, timedelta
 
 @router.post("", response_model=schemas.NotificacaoPublic)
 def criar_notificacao(
+    background_tasks: BackgroundTasks,
     data_ocorrencia: str = Form(...),
     descricao_evento: str = Form(...),
     setor_sugerido: str = Form(...),
@@ -83,6 +85,15 @@ def criar_notificacao(
     db.add(db_notificacao)
     db.commit()
     db.refresh(db_notificacao)
+    
+    # Enviar e-mail para a NSP
+    usuarios_nsp = db.query(models.Usuario.email).filter(models.Usuario.setor == "NSP", models.Usuario.email.isnot(None)).all()
+    emails_nsp = [u[0] for u in usuarios_nsp if u[0]]
+    if emails_nsp:
+        assunto = f"Nova Notificação Registrada - Protocolo {protocolo}"
+        corpo = f"Uma nova notificação foi registrada no sistema.\nProtocolo: {protocolo}\nPor favor, acesse o sistema para realizar a triagem.\n\nAtenciosamente, Sistema Notifica AMEPG"
+        background_tasks.add_task(enviar_email, emails_nsp, assunto, corpo)
+
     return db_notificacao
 
 @router.get("/public/{protocolo}", response_model=schemas.NotificacaoPublic)
@@ -117,7 +128,7 @@ def obter_notificacao(id: int, db: Session = Depends(database.get_db), current_u
     return notificacao
 
 @router.put("/{id}/triagem", response_model=schemas.Notificacao)
-def triagem_nsp(id: int, triagem: schemas.NotificacaoTriagem, db: Session = Depends(database.get_db), current_user: models.Usuario = Depends(get_current_user)):
+def triagem_nsp(id: int, triagem: schemas.NotificacaoTriagem, background_tasks: BackgroundTasks, db: Session = Depends(database.get_db), current_user: models.Usuario = Depends(get_current_user)):
     if current_user.setor != "NSP":
         raise HTTPException(status_code=403, detail="Apenas NSP pode realizar triagem")
     
@@ -156,10 +167,24 @@ def triagem_nsp(id: int, triagem: schemas.NotificacaoTriagem, db: Session = Depe
     
     db.commit()
     db.refresh(notificacao)
+    
+    # Enviar e-mail para o setor notificado
+    if notificacao.setor_notificado_definitivo:
+        usuarios_setor = db.query(models.Usuario.email).filter(
+            models.Usuario.setor == notificacao.setor_notificado_definitivo, 
+            models.Usuario.email.isnot(None)
+        ).all()
+        emails_setor = [u[0] for u in usuarios_setor if u[0]]
+        
+        if emails_setor:
+            assunto = f"Nova Notificação para seu Setor - Protocolo {notificacao.protocolo_acompanhamento}"
+            corpo = f"Uma notificação foi validada pela NSP e direcionada ao seu setor ({notificacao.setor_notificado_definitivo}).\nProtocolo: {notificacao.protocolo_acompanhamento}\nStatus atual: {notificacao.status}\n\nPor favor, acesse o sistema para analisar e responder.\n Atenciosamente, Sistema Notifica AMEPG"
+            background_tasks.add_task(enviar_email, emails_setor, assunto, corpo)
+
     return notificacao
 
 @router.put("/{id}/resposta", response_model=schemas.Notificacao)
-def resposta_setor(id: int, resposta: schemas.NotificacaoResposta, db: Session = Depends(database.get_db), current_user: models.Usuario = Depends(get_current_user)):
+def resposta_setor(id: int, resposta: schemas.NotificacaoResposta, background_tasks: BackgroundTasks, db: Session = Depends(database.get_db), current_user: models.Usuario = Depends(get_current_user)):
     notificacao = db.query(models.Notificacao).filter(models.Notificacao.id == id).first()
     if not notificacao:
         raise HTTPException(status_code=404, detail="Não encontrada")
@@ -215,6 +240,30 @@ def resposta_setor(id: int, resposta: schemas.NotificacaoResposta, db: Session =
     
     db.commit()
     db.refresh(notificacao)
+    
+    # Enviar e-mail para a NSP e para o criador da notificação
+    destinatarios = []
+    
+    # Emails NSP
+    usuarios_nsp = db.query(models.Usuario.email).filter(models.Usuario.setor == "NSP", models.Usuario.email.isnot(None)).all()
+    destinatarios.extend([u[0] for u in usuarios_nsp if u[0]])
+    
+    # Email do criador (se não for anônimo)
+    if notificacao.usuario_notificador and notificacao.usuario_notificador != "Anônimo":
+        usuario_criador = db.query(models.Usuario.email).filter(
+            models.Usuario.username == notificacao.usuario_notificador, 
+            models.Usuario.email.isnot(None)
+        ).first()
+        if usuario_criador and usuario_criador[0]:
+            destinatarios.append(usuario_criador[0])
+            
+    destinatarios = list(set(destinatarios)) # Remove duplicatas
+    
+    if destinatarios:
+        assunto = f"Notificação Respondida - Protocolo {notificacao.protocolo_acompanhamento}"
+        corpo = f"O setor {notificacao.setor_notificado_definitivo} respondeu à notificação.\nProtocolo: {notificacao.protocolo_acompanhamento}\nStatus atual: {notificacao.status}\nPor favor, acesse o sistema para conferir a resposta.\n\nAtenciosamente, Sistema Notifica AMEPG"
+        background_tasks.add_task(enviar_email, destinatarios, assunto, corpo)
+
     return notificacao
 
 class PlanoAcaoAnaliseSchema(schemas.BaseModel):
