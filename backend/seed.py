@@ -15,23 +15,17 @@ def seed_db():
         password_hash=auth.get_password_hash("senha123"),
         setor="NSP"
     )
-    farmacia_user = models.Usuario(
-        username="farmacia",
-        password_hash=auth.get_password_hash("senha123"),
-        setor="Farmácia"
-    )
-    recepcao_user = models.Usuario(
-        username="recepcao",
-        password_hash=auth.get_password_hash("senha123"),
-        setor="Recepção"
-    )
-    enfermagem_user = models.Usuario(
-        username="enfermagem",
-        password_hash=auth.get_password_hash("senha123"),
-        setor="Enfermagem"
-    )
     
-    db.add_all([nsp_user, farmacia_user, recepcao_user, enfermagem_user])
+    db.add(nsp_user)
+    db.commit()
+
+    # Inserir setores padrão
+    setores_padrao = [
+        "NSP", "Recepção", "Enfermagem", "Farmácia", "Centro Cirúrgico",
+        "Serviços Gerais", "Equipe médica", "Controladoria", "Financeiro", "Compras", "Qualidade"
+    ]
+    for setor_nome in setores_padrao:
+        db.add(models.Setor(nome=setor_nome))
     db.commit()
 
     # Inserir prazos padrão por classificação de risco
@@ -48,7 +42,7 @@ def seed_db():
     db.commit()
 
     print("Banco repovoado com sucesso.")
-    print("Usuários inseridos no banco: admin_nsp (NSP), farmacia (Farmácia), recepcao (Recepção), enfermagem (Enfermagem). Senha: senha123")
+    print("Usuário administrador inserido: admin_nsp (NSP). Senha: senha123")
     
     db.close()
 

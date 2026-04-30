@@ -2,6 +2,19 @@ from pydantic import BaseModel
 from typing import Optional, List
 from datetime import date, datetime
 
+class SetorBase(BaseModel):
+    nome: str
+
+class SetorCreate(SetorBase):
+    pass
+
+class Setor(SetorBase):
+    id: int
+
+    class Config:
+        orm_mode = True
+        from_attributes = True
+
 class ConfiguracaoPrazo(BaseModel):
     classificacao_risco: str
     prazo_dias: int

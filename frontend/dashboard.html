@@ -12,6 +12,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
         rel="stylesheet">
     <script src="/js/app.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>tailwind.config = window.tailwindConfig;</script>
     <style>
         .material-symbols-outlined {
@@ -96,6 +97,10 @@
                     <span class="material-symbols-outlined text-sm">manage_search</span>
                     Rastrear Protocolo
                 </button>
+                <button id="btnExportarCsv" onclick="exportarCsv()" class="hidden flex items-center gap-2 bg-secondary text-white px-4 py-2 rounded-lg text-sm font-bold shadow-sm hover:opacity-90 transition-opacity whitespace-nowrap">
+                    <span class="material-symbols-outlined text-sm">download</span>
+                    Exportar CSV
+                </button>
                 <select id="statusFilter" class="bg-white border border-surface-container rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary focus:outline-none text-sm shadow-sm cursor-pointer" onchange="applyFilters()">
                     <option value="all">Todos os Status</option>
                 </select>
@@ -107,7 +112,30 @@
             </div>
         </div>
 
-        <div class="p-8 pt-6 space-y-8" id="tablesContainer">
+        <div class="px-8 mt-2 relative z-20" id="kpiContainer">
+            <div class="grid grid-cols-3 gap-4 group">
+                <div class="bg-surface-container-lowest p-6 rounded-xl border border-surface-container shadow-sm flex flex-col items-center justify-center transition-all hover:bg-primary/5 cursor-default relative">
+                    <span class="text-on-surface-variant text-sm font-bold uppercase tracking-wider mb-1 text-center">Total de Notificações</span>
+                    <span class="text-3xl font-extrabold text-primary brand-font" id="kpiTotal">0</span>
+                </div>
+                <div class="bg-surface-container-lowest p-6 rounded-xl border border-surface-container shadow-sm flex flex-col items-center justify-center transition-all hover:bg-yellow-500/5 cursor-default">
+                    <span class="text-on-surface-variant text-sm font-bold uppercase tracking-wider mb-1 text-center">Pendentes</span>
+                    <span class="text-3xl font-extrabold text-yellow-600 brand-font" id="kpiPendentes">0</span>
+                </div>
+                <div class="bg-surface-container-lowest p-6 rounded-xl border border-surface-container shadow-sm flex flex-col items-center justify-center transition-all hover:bg-green-500/5 cursor-default">
+                    <span class="text-on-surface-variant text-sm font-bold uppercase tracking-wider mb-1 text-center">Concluídas</span>
+                    <span class="text-3xl font-extrabold text-green-600 brand-font" id="kpiConcluidas">0</span>
+                </div>
+                
+                <!-- O gráfico em hover será exibido acima do bloco quando houver hover em kpiContainer -->
+                <div id="hoverChartContainer" class="absolute top-full left-0 w-full mt-2 bg-white p-4 rounded-xl shadow-xl border border-surface-container opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50 h-64 pointer-events-none">
+                    <div class="text-sm font-bold text-on-surface-variant text-center mb-2">Evolução (Últimos 3 Meses)</div>
+                    <div class="h-48 relative"><canvas id="notificacoesChart"></canvas></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="p-8 pt-6 space-y-8 relative z-10" id="tablesContainer">
             <!-- As tabelas serão injetadas via JS -->
             <div class="text-center p-8 text-on-surface-variant">Carregando dados..</div>
         </div>
@@ -174,6 +202,27 @@
     <script>
         let currentUser = null;
         let notificacoesData = [];
+
+        async function exportarCsv() {
+            try {
+                const res = await apiFetch('/api/notificacoes/exportar-csv');
+                if (!res.ok) {
+                    alert('Erro ao exportar: ' + res.statusText);
+                    return;
+                }
+                const blob = await res.blob();
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'notificacoes_export.csv';
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                URL.revokeObjectURL(url);
+            } catch(e) {
+                alert('Erro de conexão ao exportar CSV.');
+            }
+        }
 
         function abrirModalRastreio() {
             document.getElementById('modalRastreio').classList.remove('hidden');
@@ -254,6 +303,7 @@
 
                 if (currentUser.setor === "NSP") {
                     document.getElementById('headerTitle').innerText = "Dashboard de Qualidade - NSP";
+                    document.getElementById('btnExportarCsv').classList.remove('hidden');
                 } else {
                     document.getElementById('headerTitle').innerText = `Dashboard - ${currentUser.setor}`;
                 }
@@ -295,6 +345,15 @@
         async function loadNotificacoes() {
             const res = await apiFetch('/api/notificacoes');
             notificacoesData = await res.json();
+            
+            // KPI calculations
+            document.getElementById('kpiTotal').innerText = notificacoesData.length;
+            const concluidas = notificacoesData.filter(n => n.status === "Respondida" || n.status === "Encerrada").length;
+            const pendentes = notificacoesData.length - concluidas;
+            document.getElementById('kpiConcluidas').innerText = concluidas;
+            document.getElementById('kpiPendentes').innerText = pendentes;
+
+            renderChart();
             
             const statusFilter = document.getElementById('statusFilter');
             const statusSet = new Set(notificacoesData.map(n => n.status).filter(Boolean));
@@ -422,6 +481,53 @@
                     </td>
                 `;
                 tbody.appendChild(tr);
+            });
+        }
+
+        let chartInstance = null;
+        function renderChart() {
+            const ctx = document.getElementById('notificacoesChart').getContext('2d');
+            
+            // Agrupar por mes nos ultimos 3 meses
+            const now = new Date();
+            const last3Months = [];
+            for (let i = 2; i >= 0; i--) {
+                const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+                last3Months.push({
+                    label: d.toLocaleString('pt-BR', { month: 'short', year: 'numeric' }),
+                    month: d.getMonth(),
+                    year: d.getFullYear(),
+                    count: 0
+                });
+            }
+            
+            notificacoesData.forEach(n => {
+                const d = new Date(n.data_criacao || n.data_ocorrencia);
+                const match = last3Months.find(m => m.month === d.getMonth() && m.year === d.getFullYear());
+                if(match) match.count++;
+            });
+
+            if(chartInstance) chartInstance.destroy();
+            
+            chartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: last3Months.map(m => m.label),
+                    datasets: [{
+                        label: 'Notificações',
+                        data: last3Months.map(m => m.count),
+                        borderColor: '#00478d',
+                        backgroundColor: 'rgba(0, 71, 141, 0.1)',
+                        tension: 0.3,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+                }
             });
         }
 

@@ -3,6 +3,11 @@ from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 from .database import Base
 
+class Setor(Base):
+    __tablename__ = "setores"
+    id = Column(Integer, primary_key=True, index=True)
+    nome = Column(String, unique=True, index=True, nullable=False)
+
 class ConfiguracaoPrazo(Base):
     __tablename__ = "configuracoes_prazo"
     id = Column(Integer, primary_key=True, index=True)

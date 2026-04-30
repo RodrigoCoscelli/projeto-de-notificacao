@@ -50,3 +50,48 @@ def salvar_prazos(payload: schemas.ConfiguracaoPrazosUpdate, db: Session = Depen
     
     db.commit()
     return db.query(models.ConfiguracaoPrazo).all()
+
+@router.get("/setores", response_model=List[schemas.Setor])
+def listar_setores(db: Session = Depends(database.get_db)):
+    setores = db.query(models.Setor).order_by(models.Setor.nome).all()
+    if not setores:
+        setores_padrao = [
+            "NSP", "Recepção", "Enfermagem", "Farmácia", "Centro Cirúrgico",
+            "Serviços Gerais", "Equipe médica", "Controladoria", "Financeiro", "Compras", "Qualidade"
+        ]
+        for s in setores_padrao:
+            db.add(models.Setor(nome=s))
+        db.commit()
+        setores = db.query(models.Setor).order_by(models.Setor.nome).all()
+    return setores
+
+@router.post("/setores", response_model=schemas.Setor)
+def criar_setor(setor: schemas.SetorCreate, db: Session = Depends(database.get_db), current_user: models.Usuario = Depends(get_current_user)):
+    if current_user.setor != "NSP":
+        raise HTTPException(status_code=403, detail="Apenas NSP pode gerenciar setores")
+    
+    existente = db.query(models.Setor).filter(models.Setor.nome == setor.nome).first()
+    if existente:
+        raise HTTPException(status_code=400, detail="Setor já existe")
+        
+    novo = models.Setor(nome=setor.nome)
+    db.add(novo)
+    db.commit()
+    db.refresh(novo)
+    return novo
+
+@router.delete("/setores/{setor_id}")
+def deletar_setor(setor_id: int, db: Session = Depends(database.get_db), current_user: models.Usuario = Depends(get_current_user)):
+    if current_user.setor != "NSP":
+        raise HTTPException(status_code=403, detail="Apenas NSP pode gerenciar setores")
+        
+    setor = db.query(models.Setor).filter(models.Setor.id == setor_id).first()
+    if not setor:
+        raise HTTPException(status_code=404, detail="Setor não encontrado")
+        
+    if setor.nome == "NSP":
+        raise HTTPException(status_code=400, detail="Não é possível excluir o setor NSP")
+        
+    db.delete(setor)
+    db.commit()
+    return {"detail": "Setor excluído com sucesso"}

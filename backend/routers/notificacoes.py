@@ -4,6 +4,9 @@ from typing import List, Optional
 import shutil
 import os
 import uuid
+import csv
+import io
+from fastapi.responses import StreamingResponse
 
 from .. import models, schemas, database
 from .auth import get_current_user
@@ -100,6 +103,70 @@ def criar_notificacao(
         background_tasks.add_task(enviar_email, emails_nsp, assunto, corpo)
 
     return db_notificacao
+
+@router.get("/exportar-csv")
+def exportar_csv(db: Session = Depends(database.get_db), current_user: models.Usuario = Depends(get_current_user)):
+    if current_user.setor != "NSP":
+        raise HTTPException(status_code=403, detail="Apenas o NSP pode exportar relatórios")
+        
+    notificacoes = db.query(models.Notificacao).all()
+    
+    output = io.StringIO()
+    writer = csv.writer(output, delimiter=';', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+    
+    # Headers
+    writer.writerow([
+        "ID", "Protocolo", "Data Criação", "Data Ocorrência", "Status", "Descricao do Evento",
+        "Setor Notificador", "Usuario Notificador", "Setor Sugerido", "Setor Definitivo",
+        "Tipo Evento", "Classificacao Risco", "Meta Internacional", "Justificativa", "Tratativa",
+        "Motivo Encerramento", "Atrasada?",
+        "Produto Descricao", "Produto Codigo", "Produto Fabricante", "Produto Registro MS", "Produto Lote", "Produto Validade",
+        "Plano Acao Status", "Plano: O que", "Plano: Por que", "Plano: Onde", "Plano: Quando", "Plano: Quem", "Plano: Como", "Plano: Quanto Custa"
+    ])
+    
+    for n in notificacoes:
+        pa = n.plano_acao
+        writer.writerow([
+            n.id,
+            n.protocolo_acompanhamento,
+            n.data_criacao.strftime("%Y-%m-%d %H:%M:%S") if n.data_criacao else "",
+            n.data_ocorrencia.strftime("%Y-%m-%d") if n.data_ocorrencia else "",
+            n.status,
+            n.descricao_evento,
+            n.setor_notificador,
+            n.usuario_notificador,
+            n.setor_sugerido,
+            n.setor_notificado_definitivo,
+            n.tipo_evento,
+            n.classificacao_risco,
+            n.classificacao_meta_internacional,
+            n.justificativa_analise,
+            n.tratativa_acao,
+            n.motivo_encerramento,
+            "Sim" if n.bloqueado_por_atraso else "Nao",
+            n.produto_descricao,
+            n.produto_codigo,
+            n.produto_fabricante,
+            n.produto_registro_ms,
+            n.produto_lote_serie,
+            n.produto_validade,
+            pa.status if pa else "",
+            pa.o_que if pa else "",
+            pa.por_que if pa else "",
+            pa.onde if pa else "",
+            pa.quando if pa else "",
+            pa.quem if pa else "",
+            pa.como if pa else "",
+            pa.quanto_custa if pa else ""
+        ])
+    
+    output.seek(0)
+    
+    return StreamingResponse(
+        iter([output.getvalue()]),
+        media_type="text/csv",
+        headers={"Content-Disposition": "attachment; filename=notificacoes_export.csv"}
+    )
 
 @router.get("/public/{protocolo}", response_model=schemas.NotificacaoPublic)
 def get_publica(protocolo: str, db: Session = Depends(database.get_db)):

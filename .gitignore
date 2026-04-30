@@ -1,3 +1,23 @@
+# Variáveis de ambiente
 .env
-.pyc
+*.env
+
+# Cache Python
 __pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+
+# Banco de dados SQLite local
+*.db
+*.sqlite
+*.sqlite3
+
+# Uploads de arquivos de usuários
+uploads/
+
+# Pytest / coverage
+.pytest_cache/
+.coverage
+htmlcov/

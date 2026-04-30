@@ -152,12 +152,7 @@
                                 <label class="block text-sm font-medium mb-1">Setor</label>
                                 <select id="new_setor" class="w-full rounded-lg border-outline-variant px-4 py-2"
                                     required>
-                                    <option value="">Selecione...</option>
-                                    <option value="NSP">NSP</option>
-                                    <option value="Recepção">Recepção</option>
-                                    <option value="Enfermagem">Enfermagem</option>
-                                    <option value="Farmácia">Farmácia</option>
-                                    <option value="Centro Cirúrgico">Centro Cirúrgico</option>
+                                    <option value="">Carregando setores...</option>
                                 </select>
                             </div>
                             <div>
@@ -196,6 +191,42 @@
                         </div>
                     </div>
                 </div>
+                
+                <!-- Gerenciamento de Setores (NSP) -->
+                <div class="p-6 border-t border-surface-container bg-surface-container-lowest">
+                    <h3 class="font-bold mb-4 text-on-surface border-b pb-2 flex items-center">
+                        <span class="material-symbols-outlined mr-2 text-primary">domain</span>
+                        Gerenciamento de Setores
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                        <div class="md:col-span-1">
+                            <form id="newSetorForm" class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-medium mb-1">Nome do Setor</label>
+                                    <input type="text" id="new_setor_name" class="w-full rounded-lg border-outline-variant px-4 py-2" required>
+                                </div>
+                                <button type="submit" class="w-full bg-secondary text-white py-2 rounded-lg font-bold hover:opacity-90">Adicionar Setor</button>
+                            </form>
+                        </div>
+                        <div class="md:col-span-2">
+                            <div class="overflow-x-auto border border-surface-container rounded-lg">
+                                <table class="w-full text-left border-collapse">
+                                    <thead class="bg-surface-container-low text-xs font-bold text-on-surface-variant uppercase tracking-wider">
+                                        <tr>
+                                            <th class="px-4 py-3">ID</th>
+                                            <th class="px-4 py-3">Nome</th>
+                                            <th class="px-4 py-3 text-right">Ações</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-surface-container text-sm" id="setoresTableBody">
+                                        <tr><td colspan="3" class="px-4 py-4 text-center text-on-surface-variant">Carregando...</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Configuração de Prazos Padrão -->
                 <div class="p-6 border-t border-surface-container bg-surface-container-lowest">
                     <h3 class="font-bold mb-4 text-on-surface border-b pb-2 flex items-center">
@@ -336,6 +367,7 @@
 
                 if (currentUser.setor === 'NSP') {
                     document.getElementById('adminPanel').classList.remove('hidden');
+                    await loadSetores();
                     loadUsers();
                     loadPrazos();
                 }
@@ -405,11 +437,7 @@
                             ${isMe ?
                             `<span class="px-2 py-1 bg-surface-variant rounded text-[11px] font-bold">${u.setor}</span>` :
                             `<select class="rounded border-outline-variant text-[11px] font-bold py-1 px-2" onchange="promptChangeSector(${u.id}, '${u.username}', '${u.setor}', this)">
-                                    <option value="NSP" ${u.setor === 'NSP' ? 'selected' : ''}>NSP</option>
-                                    <option value="Recepção" ${u.setor === 'Recepção' ? 'selected' : ''}>Recepção</option>
-                                    <option value="Enfermagem" ${u.setor === 'Enfermagem' ? 'selected' : ''}>Enfermagem</option>
-                                    <option value="Farmácia" ${u.setor === 'Farmácia' ? 'selected' : ''}>Farmácia</option>
-                                    <option value="Centro Cirúrgico" ${u.setor === 'Centro Cirúrgico' ? 'selected' : ''}>Centro Cirúrgico</option>
+                                    ${setoresList.map(s => `<option value="${s.nome}" ${u.setor === s.nome ? 'selected' : ''}>${s.nome}</option>`).join('')}
                                 </select>`
                         }
                         </td>
@@ -541,6 +569,78 @@
                 alert("Erro de conexão");
             }
         });
+
+        // Setores
+        let setoresList = [];
+        
+        async function loadSetores() {
+            try {
+                const res = await apiFetch('/api/configuracoes/setores');
+                if (res.ok) {
+                    setoresList = await res.json();
+                    
+                    // Atualiza dropdown de novo usuário
+                    const selectEl = document.getElementById('new_setor');
+                    selectEl.innerHTML = '<option value="">Selecione...</option>' + 
+                        setoresList.map(s => `<option value="${s.nome}">${s.nome}</option>`).join('');
+                        
+                    // Atualiza tabela de setores
+                    const tbody = document.getElementById('setoresTableBody');
+                    tbody.innerHTML = '';
+                    setoresList.forEach(s => {
+                        const tr = document.createElement('tr');
+                        tr.className = "hover:bg-surface-container-low transition-colors";
+                        tr.innerHTML = `
+                            <td class="px-4 py-3 font-mono text-xs text-on-surface-variant">${s.id}</td>
+                            <td class="px-4 py-3 font-bold text-on-surface">${s.nome}</td>
+                            <td class="px-4 py-3 text-right">
+                                <button onclick="deleteSetor(${s.id}, '${s.nome}')" class="text-error hover:bg-error/10 p-1.5 rounded transition-colors ${s.nome === 'NSP' ? 'opacity-50 cursor-not-allowed' : ''}" ${s.nome === 'NSP' ? 'disabled' : ''} title="Excluir Setor">
+                                    <span class="material-symbols-outlined text-sm">delete</span>
+                                </button>
+                            </td>
+                        `;
+                        tbody.appendChild(tr);
+                    });
+                }
+            } catch(e) { console.error(e); }
+        }
+
+        document.getElementById('newSetorForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const nome = document.getElementById('new_setor_name').value.trim();
+            if(!nome) return;
+            try {
+                const res = await apiFetch('/api/configuracoes/setores', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ nome })
+                });
+                if(res.ok) {
+                    showToast('Setor criado com sucesso!');
+                    document.getElementById('new_setor_name').value = '';
+                    await loadSetores();
+                    loadUsers(); // refresh users dropdowns
+                } else {
+                    const err = await res.json();
+                    showToast('Erro: ' + (err.detail || 'Não foi possível criar'), 'error');
+                }
+            } catch(e) { showToast('Erro de conexão', 'error'); }
+        });
+
+        async function deleteSetor(id, nome) {
+            if(!confirm(`Excluir o setor '${nome}'?`)) return;
+            try {
+                const res = await apiFetch(`/api/configuracoes/setores/${id}`, { method: 'DELETE' });
+                if(res.ok) {
+                    showToast('Setor excluído!');
+                    await loadSetores();
+                    loadUsers();
+                } else {
+                    const err = await res.json();
+                    showToast('Erro ao excluir: ' + (err.detail || ''), 'error');
+                }
+            } catch(e) { showToast('Erro de conexão', 'error'); }
+        }
 
         // Prazos
         async function loadPrazos() {
