@@ -45,15 +45,20 @@ def criar_notificacao(
     db: Session = Depends(database.get_db),
     current_user: models.Usuario = Depends(get_current_user)
 ):
+    protocolo = gerar_protocolo(db)
+    
     # Tratar upload se existir
     file_path = None
     if arquivo:
-        filename = f"{arquivo.filename}"
+        _, ext = os.path.splitext(arquivo.filename)
+        ext = "".join(c for c in ext if c.isalnum() or c == ".").lower()
+        if not ext:
+            ext = ".bin"
+            
+        filename = f"{protocolo}{ext}"
         file_path = os.path.join(UPLOAD_DIR, filename)
         with open(file_path, "wb") as buffer:
             shutil.copyfileobj(arquivo.file, buffer)
-
-    protocolo = gerar_protocolo(db)
     
     # Determinar autor: anônimo ou usuário logado
     if anonimo:
