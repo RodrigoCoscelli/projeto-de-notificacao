@@ -37,7 +37,26 @@ Este guia explica passo a passo como conectar a API de relatórios do sistema **
 | `Data Criacao` | Data/Hora | Data e hora do registro da notificação |
 | `Data Triagem NSP` | Data/Hora | Data e hora em que o NSP realizou a triagem |
 | `Data Resposta Setor` | Data/Hora | Data e hora em que o setor notificado respondeu |
+| `Data Prazo Limite` | Data/Hora | Data limite estipulada para a primeira resposta |
+| `Atrasada` | Texto | Retorna "Sim" se o prazo da notificação foi ultrapassado |
 | `Dias Aberto` | Número | Quantidade de dias que a notificação permaneceu/permanece em aberto |
+| `Requer Plano Acao` | Texto | Retorna "Sim" se o NSP exigiu preenchimento de Plano 5W2H |
+| `Produto Descricao` | Texto | Descrição do material/medicamento/equipamento |
+| `Produto Codigo` | Texto | Código do produto |
+| `Produto Fabricante` | Texto | Fabricante do produto |
+| `Produto Registro MS` | Texto | Registro no Ministério da Saúde |
+| `Produto Lote Serie` | Texto | Lote ou número de série |
+| `Produto Validade` | Texto | Data de validade |
+| `Plano Acao Status` | Texto | Status atual do plano de ação 5W2H |
+| `Plano O que` | Texto | O que será feito (What) |
+| `Plano Por que` | Texto | Por que será feito (Why) |
+| `Plano Onde` | Texto | Onde será feito (Where) |
+| `Plano Quando` | Texto | Quando será feito (When) |
+| `Plano Quem` | Texto | Quem fará (Who) |
+| `Plano Como` | Texto | Como será feito (How) |
+| `Plano Quanto Custa` | Texto | Quanto custa (How much) |
+| `Plano Data Aprovacao` | Data/Hora | Data e hora em que o plano foi aprovado pelo NSP |
+| `Plano Data Conclusao` | Data/Hora | Data e hora em que o plano foi concluído pelo setor |
 
 ---
 
@@ -87,6 +106,9 @@ Ao conectar com sucesso, o **Power Query Editor** será aberto:
    - `Data Criacao` → **Data/Hora**
    - `Data Triagem NSP` → **Data/Hora**
    - `Data Resposta Setor` → **Data/Hora**
+   - `Data Prazo Limite` → **Data/Hora**
+   - `Plano Data Aprovacao` → **Data/Hora**
+   - `Plano Data Conclusao` → **Data/Hora**
    - `Dias Aberto` → **Número Inteiro**
    - `ID` → **Número Inteiro**
 

@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, Header
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from typing import List
 from datetime import datetime
 
@@ -28,7 +28,7 @@ def format_date(dt):
 
 @router.get("/powerbi")
 def get_relatorio_powerbi(api_key: str = Depends(verify_api_key), db: Session = Depends(database.get_db)):
-    notificacoes = db.query(models.Notificacao).all()
+    notificacoes = db.query(models.Notificacao).options(joinedload(models.Notificacao.plano_acao)).all()
     resultado = []
     
     for n in notificacoes:
