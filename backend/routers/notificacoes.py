@@ -112,6 +112,7 @@ def exportar_csv(db: Session = Depends(database.get_db), current_user: models.Us
     notificacoes = db.query(models.Notificacao).all()
     
     output = io.StringIO()
+    output.write("\ufeff")
     writer = csv.writer(output, delimiter=';', quotechar='"', quoting=csv.QUOTE_MINIMAL)
     
     # Headers

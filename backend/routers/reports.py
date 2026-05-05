@@ -41,6 +41,8 @@ def get_relatorio_powerbi(api_key: str = Depends(verify_api_key), db: Session = 
         elif n.data_triagem_nsp:
             dias_aberto = (n.data_triagem_nsp.date() - n.data_criacao.date()).days
 
+        pa = n.plano_acao
+        
         resultado.append({
             "ID": n.id,
             "Protocolo": n.protocolo_acompanhamento,
@@ -60,13 +62,26 @@ def get_relatorio_powerbi(api_key: str = Depends(verify_api_key), db: Session = 
             "Data Criacao": format_datetime(n.data_criacao),
             "Data Triagem NSP": format_datetime(n.data_triagem_nsp),
             "Data Resposta Setor": format_datetime(n.data_resposta_setor),
+            "Data Prazo Limite": format_datetime(n.data_prazo_limite),
+            "Atrasada": "Sim" if n.bloqueado_por_atraso else "Nao",
             "Dias Aberto": max(0, dias_aberto),
+            "Requer Plano Acao": "Sim" if n.requer_plano_acao else "Nao",
             "Produto Descricao": n.produto_descricao,
             "Produto Codigo": n.produto_codigo,
             "Produto Fabricante": n.produto_fabricante,
             "Produto Registro MS": n.produto_registro_ms,
             "Produto Lote Serie": n.produto_lote_serie,
-            "Produto Validade": n.produto_validade
+            "Produto Validade": n.produto_validade,
+            "Plano Acao Status": pa.status if pa else None,
+            "Plano O que": pa.o_que if pa else None,
+            "Plano Por que": pa.por_que if pa else None,
+            "Plano Onde": pa.onde if pa else None,
+            "Plano Quando": pa.quando if pa else None,
+            "Plano Quem": pa.quem if pa else None,
+            "Plano Como": pa.como if pa else None,
+            "Plano Quanto Custa": pa.quanto_custa if pa else None,
+            "Plano Data Aprovacao": format_datetime(pa.data_aprovacao) if pa else None,
+            "Plano Data Conclusao": format_datetime(pa.data_conclusao) if pa else None
         })
     
     return resultado
