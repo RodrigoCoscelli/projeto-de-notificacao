@@ -76,3 +76,12 @@ class Notificacao(Base):
     bloqueado_por_atraso = Column(Boolean, nullable=False, default=False)
 
     plano_acao = relationship("PlanoAcao")
+
+class PasswordResetToken(Base):
+    __tablename__ = "password_reset_tokens"
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("usuarios.id"), nullable=False)
+    token = Column(String, nullable=False, index=True)  # código de 6 dígitos
+    expires_at = Column(DateTime(timezone=True), nullable=False)
+    used = Column(Boolean, nullable=False, default=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())

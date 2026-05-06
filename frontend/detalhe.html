@@ -648,8 +648,8 @@
                 document.getElementById('tSemAnexo').classList.add('hidden');
             }
 
-            // Banner de prazo para status ativos
-            const statusAtivo = ['Pendente no Setor','Aguardando Plano de Ação 5W2H','Plano de Ação Recusado','Plano em Análise NSP','Aguardando Conclusão do Plano'];
+            // Banner de prazo para status em que o setor ainda precisa responder
+            const statusAtivo = ['Pendente no Setor', 'Aguardando Plano de Ação 5W2H', 'Plano de Ação Recusado'];
             if (statusAtivo.includes(n.status)) {
                 exibirBannerPrazo(n.data_prazo_limite, n.bloqueado_por_atraso);
             }

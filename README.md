@@ -33,7 +33,8 @@ O **Notifica Ambulatório** é um sistema web criado com o auxílio da I.A para 
 | **1. Notificação** | Qualquer colaborador pode registrar um evento (com ou sem anonimato) |
 | **2. Triagem (NSP)** | O Núcleo de Segurança do Paciente classifica o evento e direciona ao setor responsável |
 | **3. Tratativa (Setor)** | O setor notificado analisa a causa raiz e registra o plano de ação |
-| **4. Encerramento** | A notificação é encerrada com toda a rastreabilidade documentada |
+| **4. Plano de Ação 5W2H** | Se solicitado na triagem, o setor preenche um plano estruturado que passa pela aprovação do NSP |
+| **5. Encerramento** | A notificação é encerrada com toda a rastreabilidade documentada |
 
 O sistema foi projetado para ser executado localmente (on-premise), sem necessidade de infraestrutura em nuvem, utilizando **SQLite** como banco de dados e o próprio backend para servir o frontend como arquivos estáticos.
 
@@ -44,7 +45,8 @@ Obs: Esse projeto foi desenvolvido com auxílio da inteligência artificial e co
 ## ✨ Funcionalidades
 
 ### Para todos os colaboradores
-- ✅ **Login seguro** com autenticação JWT (token válido por 24h)
+- ✅ **Login seguro** com autenticação JWT (token válido por 24h) — aceita usuário ou e-mail
+- ✅ **Recuperação de senha** — fluxo "Esqueci minha senha" com envio de código de 6 dígitos por e-mail e redefinição segura
 - ✅ **Criação de notificações** com data, descrição, setor envolvido e evidências (imagem/PDF)
 - ✅ **Relato anônimo** — possibilidade do setor não se identificar e a informação não ir para o banco de dados
 - ✅ **Rastreamento por protocolo** — consulta pública pelo número de protocolo (ex: `AMB-A1B2C3`), sem necessidade de login
@@ -59,8 +61,13 @@ Obs: Esse projeto foi desenvolvido com auxílio da inteligência artificial e co
   - Classificação de risco (Near miss → Óbito/Never Events)
   - Meta Internacional de Segurança do Paciente
   - Indicação de setor correto (indicação do setor correto a ser notificado)
+- ✅ **Plano de Ação 5W2H** — o NSP pode exigir na triagem que o setor preencha um plano estruturado (O quê, Por quê, Onde, Quando, Quem, Como, Quanto Custa), que passa por aprovação/recusa do NSP antes de ser executado e concluído pelo setor
+- ✅ **Governança automatizada de prazos** — cada classificação de risco possui um prazo configurável (em dias ou horas). O sistema calcula automaticamente a data limite, bloqueia a resposta do setor quando o prazo expira e permite ao NSP desbloquear com concessão de dias extras
 - ✅ **Encerramento direto** com justificativa (para eventos que não demandam tratativa ou que receberam o preenchimento incorreto)
 - ✅ **Gerenciamento de usuários** — criar, listar e excluir contas do sistema
+- ✅ **Configuração de setores** — criar e remover setores do sistema (com proteção ao setor NSP, que não pode ser excluído)
+- ✅ **Configuração de prazos** — definir prazo padrão (dias/horas) para cada classificação de risco de evento
+- ✅ **Notificações por e-mail** — e-mails automáticos enviados ao NSP (novas notificações) e aos setores (triagem realizada, análise de plano), via SMTP configurável no `.env`
 
 ### Para gestão e indicadores
 - ✅ **API dedicada para Power BI** com endpoint protegido por API Key
@@ -84,10 +91,14 @@ Obs: Esse projeto foi desenvolvido com auxílio da inteligência artificial e co
 │                   BACKEND (FastAPI + Uvicorn)            │
 │                                                         │
 │  Routers:                                               │
-│    /api/auth          → Login, token JWT, dados do user  │
-│    /api/notificacoes  → CRUD de notificações             │
-│    /api/relatorios    → Endpoint Power BI (API Key)      │
-│    /api/users         → Gerenciamento de usuários (NSP)  │
+│    /api/auth          → Login, JWT, recuperação de senha │
+│    /api/notificacoes  → CRUD + triagem + plano de ação  │
+│    /api/relatorios    → Endpoint Power BI (API Key)     │
+│    /api/users         → Gerenciamento de usuários (NSP) │
+│    /api/configuracoes → Setores e prazos por risco      │
+│                                                         │
+│  Serviços:                                              │
+│    email_service.py   → Envio de e-mails via SMTP       │
 │                                                         │
 │  Autenticação: JWT (python-jose) + bcrypt               │
 │  ORM: SQLAlchemy                                        │
@@ -98,7 +109,9 @@ Obs: Esse projeto foi desenvolvido com auxílio da inteligência artificial e co
 ┌─────────────────────────────────────────────────────────┐
 │                   BANCO DE DADOS (SQLite)                │
 │  Arquivo: database.db                                   │
-│  Tabelas: usuarios, notificacoes                        │
+│  Tabelas: usuarios, notificacoes, planos_acao,          │
+│           setores, configuracoes_prazo,                  │
+│           password_reset_tokens                          │
 └─────────────────────────────────────────────────────────┘
 ```
 
@@ -111,6 +124,7 @@ Obs: Esse projeto foi desenvolvido com auxílio da inteligência artificial e co
 | **Banco de Dados** | SQLite | embutido |
 | **Autenticação** | JWT (`python-jose`) + bcrypt | — |
 | **Validação** | Pydantic | latest |
+| **E-mail** | smtplib (SMTP/SMTP_SSL) | embutido |
 | **Frontend** | HTML5 + JavaScript + TailwindCSS (CDN) | — |
 | **Fontes** | Google Fonts (Inter, Manrope) | — |
 | **Ícones** | Material Symbols Outlined | — |
@@ -125,27 +139,30 @@ projeto-de-notificacao/
 ├── backend/                    # Código-fonte do servidor
 │   ├── main.py                 # Ponto de entrada da aplicação FastAPI
 │   ├── database.py             # Configuração do SQLAlchemy e sessões
-│   ├── models.py               # Modelos ORM (Usuario, Notificacao)
+│   ├── models.py               # Modelos ORM (Usuario, Notificacao, PlanoAcao, etc.)
 │   ├── schemas.py              # Schemas Pydantic (validação de entrada/saída)
 │   ├── auth.py                 # Lógica de autenticação (JWT, bcrypt)
+│   ├── email_service.py        # Serviço de envio de e-mails (SMTP)
 │   ├── seed.py                 # Script para popular o banco com dados iniciais
 │   └── routers/                # Rotas organizadas por domínio
-│       ├── auth.py             # Endpoints de autenticação (/api/auth)
-│       ├── notificacoes.py     # Endpoints de notificações (/api/notificacoes)
+│       ├── auth.py             # Login, JWT, recuperação de senha (/api/auth)
+│       ├── notificacoes.py     # Notificações, triagem, plano de ação (/api/notificacoes)
 │       ├── reports.py          # Endpoint Power BI (/api/relatorios)
-│       └── users.py            # Endpoints de usuários (/api/users)
+│       ├── users.py            # Gerenciamento de usuários (/api/users)
+│       └── configuracoes.py    # Setores e prazos (/api/configuracoes)
 │
 ├── frontend/                   # Interface web (servida estaticamente)
-│   ├── index.html              # Tela de login
+│   ├── index.html              # Tela de login + recuperação de senha
 │   ├── dashboard.html          # Painel principal com listagem de notificações
 │   ├── nova_notificacao.html   # Formulário de criação de notificação
-│   ├── detalhe.html            # Detalhes, triagem (NSP) e tratativa (setor)
-│   ├── configuracoes.html      # Perfil do usuário e gerenciamento (NSP)
+│   ├── detalhe.html            # Detalhes, triagem (NSP), tratativa e plano 5W2H
+│   ├── configuracoes.html      # Perfil, setores, prazos e gerenciamento (NSP)
 │   └── js/
 │       └── app.js              # Utilitários JS (apiFetch, logout, config Tailwind)
 │
 ├── uploads/                    # Evidências enviadas pelos colaboradores
 ├── database.db                 # Banco de dados SQLite (gerado automaticamente)
+├── .env                        # Variáveis de ambiente (SMTP, etc.) — não versionado
 ├── requirements.txt            # Dependências Python
 ├── run.bat                     # Script de execução rápida (Windows)
 ├── COMO_RODAR.md               # Guia detalhado de instalação
@@ -159,9 +176,8 @@ projeto-de-notificacao/
 
 Funcionalidades planejadas para versões futuras:
 
-- [ ] Notificações por e-mail aos setores e a NSP
-- [ ] Dashboard com gráficos embarcados para insights gerenciais
 - [ ] Deploy em ambiente de servidor (Docker / Cloud)
+- [ ] Relatórios PDF automáticos
 
 ---
 
